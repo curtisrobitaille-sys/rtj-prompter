@@ -111,7 +111,7 @@
     box-shadow: inset 0 2px 4px rgba(255, 235, 190, .55), 0 0 12px rgba(255, 180, 60, .7); color: #ffe9b8; }
   .rtj-btn.on:hover { box-shadow: inset 0 2px 3px rgba(255, 240, 200, .75), inset 0 -8px 14px rgba(20, 10, 0, .55), 0 0 26px rgba(255, 195, 80, .8), 0 6px 16px rgba(0, 0, 0, .5); }
   body.recording .btn-record .dot { animation: blink 1s steps(2) infinite; }
-  .floating-dock { position: fixed; top: 50%; transform: translate(0, -50%); display: flex; flex-direction: column; gap: 18px; z-index: 1000; transition: transform .45s cubic-bezier(.25, 1.45, .4, 1), opacity .3s ease; }
+  .floating-dock { position: fixed; top: calc(50% + 164px); transform: translate(0, -50%); display: flex; flex-direction: column; gap: 18px; z-index: 1000; transition: transform .45s cubic-bezier(.25, 1.45, .4, 1), opacity .3s ease; }
   .dock-left { left: -24px; }
   .dock-right { right: -24px; }
   .floating-dock .rtj-btn { min-width: 208px; justify-content: flex-start; border-radius: 9999px; }
@@ -137,11 +137,11 @@
   #cam.front { transform: scaleX(-1); }
   body.camon #cam { display: block; }
   body.camon #text { text-shadow: 0 2px 14px rgba(0,0,0,.92), 0 0 6px rgba(0,0,0,.92); }
-  #campills { position: fixed; right: 0; top: calc(50% + 128px); display: none; flex-direction: column; gap: 10px; z-index: 1000; transition: opacity .3s ease; }
+  #campills { position: fixed; right: 0; top: calc(50% - 76px); display: none; flex-direction: column; gap: 10px; z-index: 1000; transition: opacity .3s ease; }
   body.camon:not(.recording) #campills { display: flex; }
   #campills .rtj-btn { min-width: 158px; justify-content: flex-start; padding: 7px 30px 7px 8px; border-radius: 9999px; font-size: .78rem; gap: 9px; }
   #campills .rtj-btn .ic { width: 30px; height: 30px; font-size: 14px; }
-  #takeThumb { position: fixed; right: 18px; bottom: 22px; width: 176px; z-index: 900; display: none; cursor: pointer; font-family: Arial, sans-serif; }
+  #takeThumb { position: fixed; right: 18px; top: 172px; width: 176px; z-index: 900; display: none; cursor: pointer; font-family: Arial, sans-serif; }
   body.recording #takeThumb { display: none !important; }
   #takeThumb video { width: 100%; display: block; border-radius: 12px; border: 2px solid rgba(94, 234, 230, .85); background: #000;
     box-shadow: 0 0 14px rgba(40, 201, 199, .4), 0 8px 18px rgba(0, 0, 0, .5); }
@@ -149,7 +149,7 @@
   #thumbSaved { position: absolute; left: 8px; top: 8px; background: rgba(20, 90, 50, .85); color: #d8ffe9; font-size: 12px; padding: 2px 7px; border-radius: 999px; display: none; }
   #takeThumb .tcap { margin-top: 6px; text-align: center; color: #c9f5ff; font-size: 13px; text-shadow: 0 1px 6px rgba(0,0,0,.8); }
   #saveNote { font-family: Arial, sans-serif; font-size: 13px; color: #8fa8a0; margin-top: 8px; }
-  #takesWrap { position: fixed; left: 0; top: calc(50% + 128px); display: none; z-index: 1000; transition: opacity .3s ease; }
+  #takesWrap { position: fixed; left: 0; top: calc(50% - 14px); display: none; z-index: 1000; transition: opacity .3s ease; }
   body.faded #takesWrap, body.recording #takesWrap { opacity: 0; pointer-events: none; }
   #takesWrap .rtj-btn { min-width: 158px; justify-content: flex-start; padding: 7px 8px 7px 30px; border-radius: 9999px; font-size: .78rem; gap: 9px; }
   #takesWrap .rtj-btn .ic { width: 30px; height: 30px; font-size: 14px; }

@@ -47,6 +47,21 @@
     border-radius: 8px; padding: 12px 20px; font-size: 16px; cursor: pointer; min-height: 48px; }
   #editView button.ghost { background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; }
 
+  /* script library */
+  #libBlock { margin-top: 22px; border-top: 1px solid #2a2a2e; padding-top: 16px; font-family: Arial, sans-serif; overflow-y: auto; }
+  #libBlock h2 { font-size: 16px; color: var(--gold); margin-bottom: 10px; }
+  .libsave { display: flex; gap: 8px; flex-wrap: wrap; }
+  #libName { flex: 1; min-width: 220px; background: #141416; color: var(--ink); border: 1px solid #333;
+    border-radius: 8px; padding: 12px; font-size: 16px; }
+  #libList { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  #libList .librow { display: flex; align-items: center; gap: 8px; background: #141416; border: 1px solid #2a2a2e;
+    border-radius: 8px; padding: 10px 12px; }
+  #libList .nm { flex: 1; font-size: 16px; }
+  #libList button { background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; border-radius: 8px;
+    padding: 9px 14px; font-size: 14px; cursor: pointer; min-height: 40px; font-weight: 400; }
+  #libList button.load { background: var(--gold); color: #000; font-weight: 700; border: 0; }
+  .libempty { color: #888; font-size: 14px; }
+
   /* ---------- prompt stage ---------- */
   #stage { position: fixed; inset: 0; overflow: hidden; }
   #scroller { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
@@ -148,6 +163,14 @@
     <button id="saveScript">Save &amp; prompt</button>
     <button id="cancelEdit" class="ghost">Cancel</button>
   </div>
+  <div id="libBlock">
+    <h2>Saved scripts — tap Load to put one on the prompter</h2>
+    <div class="libsave">
+      <input id="libName" type="text" placeholder="Name this script — e.g. Curtis's dialogue">
+      <button id="libSaveBtn">Save script</button>
+    </div>
+    <div id="libList"></div>
+  </div>
 </div>
 
 <script>
@@ -221,11 +244,55 @@ document.getElementById('fsBtn').addEventListener('click', () => {
 /* edit view */
 const editView = document.getElementById('editView');
 const scriptBox = document.getElementById('scriptBox');
-document.getElementById('editBtn').addEventListener('click', () => { pause(); scriptBox.value = script; editView.classList.add('open'); });
+document.getElementById('editBtn').addEventListener('click', () => { pause(); scriptBox.value = script; renderLib(); editView.classList.add('open'); });
 document.getElementById('cancelEdit').addEventListener('click', () => editView.classList.remove('open'));
 document.getElementById('saveScript').addEventListener('click', () => {
   script = scriptBox.value; localStorage.setItem('prompterScript', script);
   render(); toTop(); editView.classList.remove('open');
+});
+
+/* ---------- script library ---------- */
+const libList = document.getElementById('libList');
+const libName = document.getElementById('libName');
+function loadLib() { try { return JSON.parse(localStorage.getItem('prompterLibrary') || '{}'); } catch (e) { return {}; } }
+function storeLib(lib) { localStorage.setItem('prompterLibrary', JSON.stringify(lib)); }
+if (!localStorage.getItem('prompterLibrarySeeded')) {
+  const seedLib = loadLib();
+  if (!seedLib['Standup 1 — Ivany Campus']) seedLib['Standup 1 — Ivany Campus'] = DEFAULT_SCRIPT;
+  if (!seedLib['Standup 2 — Construction']) seedLib['Standup 2 — Construction'] = 'Construction and development projects continue to change the way communities look and operate.\n\nNew facilities can provide improved spaces for students, employees, and visitors, while also creating challenges during the construction process.\n\nI\'m Curtis Robitaille, WTV News, Dartmouth.';
+  if (!seedLib['Standup 3 — College Life']) seedLib['Standup 3 — College Life'] = 'College life extends well beyond the classroom, with students balancing academic responsibilities, extracurricular activities, and time with friends.\n\nCampus common areas provide opportunities for students to connect, collaborate, and take a break from their busy schedules.\n\nI\'m Curtis Robitaille, WTV News, Dartmouth.';
+  storeLib(seedLib);
+  localStorage.setItem('prompterLibrarySeeded', '1');
+}
+function renderLib() {
+  const lib = loadLib();
+  const names = Object.keys(lib);
+  libList.innerHTML = '';
+  if (!names.length) {
+    const d = document.createElement('div'); d.className = 'libempty';
+    d.textContent = 'No saved scripts yet. Write one above, give it a name, and save it.';
+    libList.appendChild(d); return;
+  }
+  names.forEach(nm => {
+    const row = document.createElement('div'); row.className = 'librow';
+    const label = document.createElement('span'); label.className = 'nm'; label.textContent = nm;
+    const load = document.createElement('button'); load.className = 'load'; load.textContent = 'Load';
+    load.addEventListener('click', () => {
+      script = loadLib()[nm]; localStorage.setItem('prompterScript', script);
+      render(); toTop(); editView.classList.remove('open');
+    });
+    const del = document.createElement('button'); del.textContent = 'Delete';
+    del.addEventListener('click', () => { const l = loadLib(); delete l[nm]; storeLib(l); renderLib(); });
+    row.appendChild(label); row.appendChild(load); row.appendChild(del);
+    libList.appendChild(row);
+  });
+}
+document.getElementById('libSaveBtn').addEventListener('click', () => {
+  const lib = loadLib();
+  let nm = libName.value.trim();
+  if (!nm) nm = 'Script ' + new Date().toLocaleString();
+  lib[nm] = scriptBox.value;
+  storeLib(lib); libName.value = ''; renderLib();
 });
 
 /* keyboard */

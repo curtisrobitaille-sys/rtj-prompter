@@ -80,6 +80,10 @@
   #marker::after { right: 6px; border-right: 22px solid var(--gold); }
   #marker .line { position: absolute; left: 40px; right: 40px; top: 0;
     border-top: 1px solid rgba(201,162,39,.35); }
+  #marker .grab { position: absolute; left: 0; right: 0; top: -16px; height: 32px; cursor: ns-resize; pointer-events: auto; }
+  #marker::before, #marker::after { transition: transform .15s; }
+  #marker:hover::before { transform: scale(1.3); }
+  #marker:hover::after { transform: scale(1.3); }
   /* RTJ buttons + floating docks (Curtis's design package, Nov 9) */
   .rtj-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -148,7 +152,7 @@
 <div id="stage">
   <video id="cam" autoplay playsinline muted></video>
   <div id="scroller"><div id="text"></div></div>
-  <div id="marker"><div class="line"></div></div>
+  <div id="marker"><div class="line"></div><div class="grab" title="Drag to move the reading line"></div></div>
 <div class="floating-dock dock-left">
   <button class="rtj-btn" data-act="play">▶ Play</button>
   <button class="rtj-btn" data-act="top">↑ Top</button>
@@ -347,7 +351,21 @@ document.addEventListener('mousemove', (e) => {
   if (e.clientY > 240) hideTimer = setTimeout(() => { if (playing) { topwrap.classList.add('fade'); document.body.classList.add('faded'); } }, 2500);
 });
 
-window.addEventListener('resize', () => { clampY(); apply(); });
+window.addEventListener('resize', () => { applyMark(); clampY(); apply(); });
+
+/* draggable reading line — drag the gold arrows up or down; the spot is remembered */
+let markFrac = parseFloat(localStorage.getItem('prompterMarkFrac')) || 0.55;
+function applyMark() { document.documentElement.style.setProperty('--mark', (markFrac * window.innerHeight) + 'px'); }
+applyMark();
+const grabEl = document.querySelector('#marker .grab');
+let draggingLine = false;
+grabEl.addEventListener('pointerdown', (e) => { draggingLine = true; grabEl.setPointerCapture(e.pointerId); e.preventDefault(); });
+grabEl.addEventListener('pointermove', (e) => {
+  if (!draggingLine) return;
+  markFrac = Math.min(0.85, Math.max(0.15, e.clientY / window.innerHeight));
+  applyMark(); clampY(); apply();
+});
+grabEl.addEventListener('pointerup', () => { draggingLine = false; localStorage.setItem('prompterMarkFrac', markFrac); });
 
 /* ---------- record mode ---------- */
 const cam = document.getElementById('cam');

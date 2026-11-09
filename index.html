@@ -85,25 +85,45 @@
   #marker:hover::before { transform: scale(1.3); }
   #marker:hover::after { transform: scale(1.3); }
   /* RTJ buttons + floating docks (Curtis's design package, Nov 9) */
-  .rtj-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  .rtj-btn { -webkit-appearance: none; appearance: none; display: inline-flex; align-items: center; gap: 12px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-    color: #c9f5ff; background: rgba(8, 28, 36, 0.65); border: 1.5px solid #28c9c7; cursor: pointer;
-    user-select: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 0 12px rgba(40, 201, 199, 0.35), inset 0 0 10px rgba(40, 201, 199, 0.2);
-    transition: all 0.2s ease-in-out; }
-  .rtj-btn:hover { background: rgba(14, 45, 58, 0.85); color: #ffffff; border-color: #5efffd;
-    box-shadow: 0 0 20px rgba(94, 255, 253, 0.6), inset 0 0 14px rgba(94, 255, 253, 0.25); }
-  .rtj-btn.on { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 16px rgba(201,162,77,.45), inset 0 0 10px rgba(201,162,77,.25); }
-  .rtj-btn.btn-record { border-color: #c9a24d; color: #f3d27a; box-shadow: 0 0 12px rgba(201,162,77,.4), inset 0 0 10px rgba(201,162,77,.22); }
-  .rtj-btn.btn-record:hover { border-color: #f3d27a; color: #ffe9a8; }
-  .floating-dock { position: fixed; top: var(--mark); transform: translateY(-50%); display: flex; flex-direction: column; gap: 18px; z-index: 1000; transition: opacity .25s; }
-  .dock-left { left: 24px; }
-  .dock-right { right: 24px; }
-  .floating-dock .rtj-btn { min-width: 150px; padding: 12px 24px; border-radius: 9999px; }
-  body.faded .floating-dock { opacity: 0; pointer-events: none; }
-  body.faded .floating-dock.near { opacity: 1; pointer-events: auto; }
-  body.recmode .floating-dock { display: none; }
+    font-size: 1rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
+    color: #d9fbff; background: linear-gradient(180deg, rgba(38, 110, 118, .88), rgba(10, 44, 54, .88) 55%, rgba(6, 30, 40, .92));
+    border: 2px solid rgba(94, 234, 230, .85); cursor: pointer; user-select: none;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: inset 0 2px 3px rgba(190, 255, 250, .55), inset 0 -8px 14px rgba(0, 10, 14, .55), 0 0 14px rgba(40, 201, 199, .45), 0 6px 14px rgba(0, 0, 0, .45);
+    text-shadow: 0 0 8px rgba(120, 240, 235, .6);
+    transition: filter .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .rtj-btn .ic { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 19px; color: #c9fbff; background: radial-gradient(circle at 35% 30%, rgba(120, 240, 235, .5), rgba(10, 50, 60, .9) 70%);
+    border: 2px solid rgba(140, 245, 240, .9); box-shadow: inset 0 2px 4px rgba(200, 255, 250, .5), 0 0 10px rgba(40, 201, 199, .55);
+    text-shadow: 0 0 6px rgba(140, 245, 240, .8); }
+  .rtj-btn .uarr { border-bottom: 3px solid currentColor; line-height: .72; padding-bottom: 2px; display: inline-block; }
+  .rtj-btn .dot { width: 18px; height: 18px; border-radius: 50%; display: block;
+    background: radial-gradient(circle at 38% 32%, #ffb1a1, #ff3b1f 55%, #c11100); box-shadow: 0 0 10px rgba(255, 60, 30, .8); }
+  .rtj-btn:hover { filter: brightness(1.22);
+    box-shadow: inset 0 2px 3px rgba(200, 255, 252, .7), inset 0 -8px 14px rgba(0, 10, 14, .5), 0 0 22px rgba(64, 224, 219, .75), 0 6px 16px rgba(0, 0, 0, .5); }
+  .rtj-btn:active { filter: brightness(1.35); }
+  .rtj-btn.on { background: linear-gradient(180deg, rgba(122, 84, 16, .92), rgba(64, 42, 6, .94) 60%, rgba(40, 26, 4, .96));
+    border-color: #f5c86e; color: #ffe1a1; text-shadow: 0 0 8px rgba(255, 190, 80, .65);
+    box-shadow: inset 0 2px 3px rgba(255, 230, 170, .6), inset 0 -8px 14px rgba(20, 10, 0, .6), 0 0 18px rgba(245, 180, 60, .55), 0 6px 14px rgba(0, 0, 0, .45); }
+  .rtj-btn.on .ic { border-color: #ffd98c; background: radial-gradient(circle at 35% 30%, rgba(255, 205, 110, .55), rgba(70, 45, 5, .9) 70%);
+    box-shadow: inset 0 2px 4px rgba(255, 235, 190, .55), 0 0 12px rgba(255, 180, 60, .7); color: #ffe9b8; }
+  .rtj-btn.on:hover { box-shadow: inset 0 2px 3px rgba(255, 240, 200, .75), inset 0 -8px 14px rgba(20, 10, 0, .55), 0 0 26px rgba(255, 195, 80, .8), 0 6px 16px rgba(0, 0, 0, .5); }
+  body.recording .btn-record .dot { animation: blink 1s steps(2) infinite; }
+  .floating-dock { position: fixed; top: 50%; transform: translate(0, -50%); display: flex; flex-direction: column; gap: 18px; z-index: 1000; transition: transform .45s cubic-bezier(.25, 1.45, .4, 1), opacity .3s ease; }
+  .dock-left { left: -24px; }
+  .dock-right { right: -24px; }
+  .floating-dock .rtj-btn { min-width: 208px; justify-content: flex-start; border-radius: 9999px; }
+  .dock-left .rtj-btn { padding: 10px 22px 10px 36px; }
+  .dock-right .rtj-btn { padding: 10px 36px 10px 12px; }
+  body.faded .floating-dock { pointer-events: none; }
+  body.faded .dock-left { animation: dockOutL .38s ease-in forwards; }
+  body.faded .dock-right { animation: dockOutR .38s ease-in forwards; }
+  @keyframes dockOutL { 0% { transform: translate(0, -50%); opacity: 1; } 30% { transform: translate(16px, -50%); opacity: 1; } 100% { transform: translate(-118%, -50%); opacity: 0; } }
+  @keyframes dockOutR { 0% { transform: translate(0, -50%); opacity: 1; } 30% { transform: translate(-16px, -50%); opacity: 1; } 100% { transform: translate(118%, -50%); opacity: 0; } }
+  body.faded #campills { opacity: 0; pointer-events: none; }
+  body.faded .floating-dock.near { opacity: 1; pointer-events: auto; animation: none; transform: translate(0, -50%); }
   /* countdown */
   #count { position: fixed; inset: 0; z-index: 50; display: none;
     align-items: center; justify-content: center;
@@ -115,19 +135,12 @@
   /* ---------- record mode ---------- */
   #cam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: none; background: #000; }
   #cam.front { transform: scaleX(-1); }
-  body.recmode #cam { display: block; }
-  body.recmode #text { text-shadow: 0 2px 14px rgba(0,0,0,.92), 0 0 6px rgba(0,0,0,.92); }
-  body.recmode #hint { display: none; }
-  #recbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: none;
-    justify-content: center; align-items: center; gap: 14px; padding: 14px;
-    background: rgba(10,10,12,.72); font-family: Arial, sans-serif; }
-  body.recmode #recbar { display: flex; }
-  #recbar button { border-radius: 999px; border: 1px solid #3a3a3e; background: #1c1c1f; color: var(--ink);
-    padding: 12px 22px; font-size: 17px; cursor: pointer; min-height: 52px; }
-  #recBtn { background: #b3001b; border-color: #ff3355; font-weight: 700; min-width: 170px; }
-  #recBtn.recording { background: #1c1c1f; color: #ff5b74; }
-  #recTime { color: #ff5b74; font-size: 18px; min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
-  #recDot { width: 12px; height: 12px; border-radius: 50%; background: #ff3355; display: none; animation: blink 1s steps(2) infinite; }
+  body.camon #cam { display: block; }
+  body.camon #text { text-shadow: 0 2px 14px rgba(0,0,0,.92), 0 0 6px rgba(0,0,0,.92); }
+  #campills { position: fixed; right: 0; top: calc(50% + 128px); display: none; flex-direction: column; gap: 10px; z-index: 1000; transition: opacity .3s ease; }
+  body.camon:not(.recording) #campills { display: flex; }
+  #campills .rtj-btn { min-width: 158px; justify-content: flex-start; padding: 7px 30px 7px 8px; border-radius: 9999px; font-size: .78rem; gap: 9px; }
+  #campills .rtj-btn .ic { width: 30px; height: 30px; font-size: 14px; }
   @keyframes blink { 50% { opacity: .15; } }
   #camMsg { position: fixed; left: 0; right: 0; bottom: 96px; z-index: 46; text-align: center;
     color: #ffb3c0; font-family: Arial, sans-serif; font-size: 15px; display: none; padding: 0 16px; }
@@ -154,23 +167,20 @@
   <div id="scroller"><div id="text"></div></div>
   <div id="marker"><div class="line"></div><div class="grab" title="Drag to move the reading line"></div></div>
 <div class="floating-dock dock-left">
-  <button class="rtj-btn" data-act="play">▶ Play</button>
-  <button class="rtj-btn" data-act="top">↑ Top</button>
-  <button class="rtj-btn" data-act="mirror">⧉ Mirror</button>
+  <button class="rtj-btn" data-act="play"><span class="ic">▶</span><span class="lbl">Play</span></button>
+  <button class="rtj-btn" data-act="top"><span class="ic"><span class="uarr">↑</span></span><span class="lbl">Top</span></button>
+  <button class="rtj-btn" data-act="mirror"><span class="ic">⧉</span><span class="lbl">Mirror</span></button>
 </div>
 <div class="floating-dock dock-right">
-  <button class="rtj-btn btn-record" data-act="rec">⦿ Record</button>
-  <button class="rtj-btn" data-act="edit">✎ Edit</button>
-  <button class="rtj-btn" data-act="fs">⛶ Fullscreen</button>
+  <button class="rtj-btn btn-record" data-act="rec"><span class="ic"><span class="dot"></span></span><span class="lbl">Record</span></button>
+  <button class="rtj-btn" data-act="edit"><span class="ic">✎</span><span class="lbl">Edit</span></button>
+  <button class="rtj-btn" data-act="fs"><span class="ic">⛶</span><span class="lbl">Fullscreen</span></button>
 </div>
 </div>
-<div id="recbar">
-  <span id="recDot"></span>
-  <button id="recPlayBtn" title="Roll or pause the words">▶ Words</button>
-  <button id="recBtn">● Record</button>
-  <span id="recTime">0:00</span>
-  <button id="flipBtn" title="Front / back camera">⇄ Camera</button>
-  <label id="zoomWrap" style="display:none; align-items:center; gap:6px;">Zoom <input type="range" id="zoomIn" step="0.1"></label>
+<div id="campills">
+  <button class="rtj-btn" id="flipBtn"><span class="ic">⇄</span><span class="lbl">Camera</span></button>
+  <button class="rtj-btn" id="camOffBtn"><span class="ic">✕</span><span class="lbl">Cam off</span></button>
+  <label id="zoomWrap" style="display:none; align-items:center; gap:6px; color:#c9f5ff; font-family:Arial,sans-serif; font-size:.8rem;">Zoom <input type="range" id="zoomIn" step="0.1"></label>
 </div>
 <div id="camMsg"></div>
 <div id="takeView">
@@ -181,6 +191,7 @@
     <button id="discardBtn">Discard &amp; back</button>
   </div>
   <p id="takeFmt" style="font-family:Arial,sans-serif; font-size:14px; color:#bbb; margin-top:10px;"></p>
+  <p id="saveNote" style="font-family:Arial,sans-serif; font-size:14px; color:#bbb; margin-top:6px;"></p>
 </div>
 <div id="count"></div>
 <div id="hint">Space = play / pause &nbsp;·&nbsp; ↑ ↓ = speed &nbsp;·&nbsp; ← → = nudge &nbsp;·&nbsp; controls live on the screen edges</div>
@@ -239,7 +250,7 @@ function tick(t) {
   apply();
   raf = requestAnimationFrame(tick);
 }
-function setPlayUI(icon, label) { document.querySelectorAll('[data-act="play"]').forEach(b => b.textContent = icon + ' ' + label); }
+function setPlayUI(icon, label) { document.querySelectorAll('[data-act="play"]').forEach(b => { b.querySelector('.ic').textContent = icon; b.querySelector('.lbl').textContent = label; }); }
 function play() {
   if (playing) return;
   playing = true; setPlayUI('⏸', 'Pause'); lastT = null;
@@ -272,7 +283,7 @@ document.querySelectorAll('.floating-dock .rtj-btn').forEach(b => b.addEventList
   else if (act === 'mirror') { mirrored = !mirrored; textEl.classList.toggle('mirror', mirrored); document.querySelectorAll('[data-act="mirror"]').forEach(x => x.classList.toggle('on', mirrored)); }
   else if (act === 'edit') { pause(); scriptBox.value = script; renderLib(); editView.classList.add('open'); }
   else if (act === 'fs') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
-  else if (act === 'rec') toggleRecMode();
+  else if (act === 'rec') recButtonFlow();
 }));
 
 /* edit view */
@@ -372,14 +383,12 @@ grabEl.addEventListener('pointerup', () => { draggingLine = false; localStorage.
 /* ---------- record mode ---------- */
 const cam = document.getElementById('cam');
 const camMsg = document.getElementById('camMsg');
-const recBtn = document.getElementById('recBtn');
-const recDot = document.getElementById('recDot');
-const recTime = document.getElementById('recTime');
 const takeView = document.getElementById('takeView');
 const takeVideo = document.getElementById('takeVideo');
 const dlBtn = document.getElementById('dlBtn');
 let stream = null, recorder = null, chunks = [], recStart = 0, recTimer = null;
-let facing = 'user', recMode = false;
+let facing = 'user', camState = 'off';
+let takeBlob = null, takeName = '', usePicker = !!window.showSaveFilePicker;
 
 function fmtTime(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 
@@ -415,32 +424,45 @@ function setupZoom() {
   } catch (e) { wrap.style.display = 'none'; }
 }
 
-async function toggleRecMode() {
-  if (!recMode) {
-    if (!navigator.mediaDevices || !window.MediaRecorder) {
-      camMsg.textContent = 'This browser cannot record video. Prompt mode still works.';
-      camMsg.style.display = 'block';
-      return;
-    }
-    recMode = true;
-    document.body.classList.add('recmode');
-    document.querySelectorAll('[data-act="rec"]').forEach(b => { b.classList.add('on'); b.textContent = '⦿ Record: on'; });
-    await startCam();
-  } else {
-    recMode = false;
-    document.body.classList.remove('recmode');
-    document.querySelectorAll('[data-act="rec"]').forEach(b => { b.classList.remove('on'); b.textContent = '⦿ Record'; });
-    if (recorder && recorder.state === 'recording') stopRecording();
-    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-    pause();
+function setRecUI(label) { document.querySelectorAll('[data-act="rec"]').forEach(b => b.querySelector('.lbl').textContent = label); }
+async function recButtonFlow() {
+  if (camState === 'recording') { stopRecording(); return; }
+  if (camState === 'preview') { startCountdownToTake(); return; }
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    camMsg.textContent = 'This browser cannot record video. Prompt mode still works.';
+    camMsg.style.display = 'block';
+    return;
   }
+  const ok = await startCam(); if (!ok) return;
+  camState = 'preview';
+  document.body.classList.add('camon');
+  document.querySelectorAll('[data-act="rec"]').forEach(b => b.classList.add('on'));
+  setRecUI('Start take');
+}
+function cameraOff() {
+  if (camState === 'recording') return;
+  camState = 'off';
+  document.body.classList.remove('camon');
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  cam.srcObject = null;
+  document.querySelectorAll('[data-act="rec"]').forEach(b => b.classList.remove('on'));
+  setRecUI('Record');
+}
+function startCountdownToTake() {
+  if (playing) pause();
+  let n = 3; countEl.style.display = 'flex'; countEl.textContent = n;
+  const iv = setInterval(() => {
+    n--;
+    if (n <= 0) { clearInterval(iv); countEl.style.display = 'none'; beginTake(); }
+    else countEl.textContent = n;
+  }, 800);
 }
 
 document.getElementById('flipBtn').addEventListener('click', async () => {
   facing = (facing === 'user') ? 'environment' : 'user';
-  if (recMode) await startCam();
+  if (camState !== 'off') await startCam();
 });
-document.getElementById('recPlayBtn').addEventListener('click', countdownThenPlay);
+document.getElementById('camOffBtn').addEventListener('click', cameraOff);
 
 function pickMime() {
   const opts = ['video/mp4', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1.640028,mp4a.40.2',
@@ -456,47 +478,68 @@ function beginTake() {
   recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
   recorder.onstop = showTake;
   recorder.start(250);
+  camState = 'recording';
+  document.body.classList.add('recording');
   recStart = Date.now();
-  recTime.textContent = '0:00';
-  recTimer = setInterval(() => { recTime.textContent = fmtTime(Date.now() - recStart); }, 250);
-  recBtn.textContent = '■ Stop'; recBtn.classList.add('recording'); recDot.style.display = 'block';
+  setRecUI('0:00');
+  recTimer = setInterval(() => { setRecUI(fmtTime(Date.now() - recStart)); }, 250);
   toTop(); play();
 }
 
 function stopRecording() {
   if (recorder && recorder.state === 'recording') recorder.stop();
   clearInterval(recTimer);
-  recBtn.textContent = '● Record'; recBtn.classList.remove('recording'); recDot.style.display = 'none';
+  camState = 'preview';
+  document.body.classList.remove('recording');
+  setRecUI('Start take');
   pause();
 }
 
-recBtn.addEventListener('click', async () => {
-  if (recorder && recorder.state === 'recording') { stopRecording(); return; }
-  if (!stream) { const ok = await startCam(); if (!ok) return; }
-  if (playing) pause();
-  let n = 3; countEl.style.display = 'flex'; countEl.textContent = n;
-  const iv = setInterval(() => {
-    n--;
-    if (n <= 0) { clearInterval(iv); countEl.style.display = 'none'; beginTake(); }
-    else countEl.textContent = n;
-  }, 800);
-});
 
 function showTake() {
   const type = (recorder && recorder.mimeType) || 'video/webm';
   const blob = new Blob(chunks, { type: type });
+  takeBlob = blob;
   const url = URL.createObjectURL(blob);
   takeVideo.src = url;
   dlBtn.href = url;
-  dlBtn.download = 'rtj-take.' + (type.indexOf('mp4') >= 0 ? 'mp4' : 'webm');
-  document.getElementById('takeFmt').textContent = (type.indexOf('mp4') >= 0)
-    ? 'Saved as MP4 (H.264) — opens straight into Premiere.'
-    : 'Saved as WebM — this browser could not record MP4. Selah can convert it for Premiere.';
+  const ext = type.indexOf('mp4') >= 0 ? 'mp4' : 'webm';
+  const d = new Date(); const pad = n => String(n).padStart(2, '0');
+  takeName = 'rtj-take-' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.' + ext;
+  dlBtn.download = takeName;
+  document.getElementById('takeFmt').textContent = (ext === 'mp4')
+    ? 'Recorded as MP4 (H.264) — opens straight into Premiere.'
+    : 'Recorded as WebM — this browser could not record MP4. Selah can convert it for Premiere.';
+  document.getElementById('saveNote').innerHTML = '📁 When you save, this goes to your <b>Downloads</b> folder as ' + takeName;
   takeView.classList.add('open');
 }
+dlBtn.addEventListener('click', async (e) => {
+  const note = document.getElementById('saveNote');
+  if (!takeBlob) return;
+  if (usePicker) {
+    e.preventDefault();
+    try {
+      const handle = await window.showSaveFilePicker({ suggestedName: takeName,
+        types: [{ description: 'Video', accept: { [takeBlob.type.split(';')[0]]: ['.' + takeName.split('.').pop()] } }] });
+      const w = await handle.createWritable(); await w.write(takeBlob); await w.close();
+      note.textContent = '✓ Saved as ' + takeName + ' — in the folder you just picked.';
+    } catch (err) {
+      if (err && err.name === 'AbortError') { note.textContent = 'Save cancelled — your take is still here whenever you are ready.'; }
+      else {
+        usePicker = false;
+        note.textContent = '✓ Saved as ' + takeName + ' · in your Downloads folder.';
+        const a = document.createElement('a'); a.href = dlBtn.href; a.download = takeName; a.click();
+      }
+    }
+  } else {
+    note.innerHTML = '✓ Saved as ' + takeName + ' · in your Downloads folder. In Chrome, the download shows at the top-right of the browser — choose “Show in Finder” to jump straight to it.';
+  }
+});
 document.getElementById('discardBtn').addEventListener('click', () => {
   takeView.classList.remove('open');
   takeVideo.removeAttribute('src'); takeVideo.load();
+  takeBlob = null;
+  cameraOff();
 });
 
 render(); apply();

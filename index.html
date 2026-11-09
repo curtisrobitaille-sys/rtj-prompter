@@ -141,6 +141,14 @@
   body.camon:not(.recording) #campills { display: flex; }
   #campills .rtj-btn { min-width: 158px; justify-content: flex-start; padding: 7px 30px 7px 8px; border-radius: 9999px; font-size: .78rem; gap: 9px; }
   #campills .rtj-btn .ic { width: 30px; height: 30px; font-size: 14px; }
+  #takeThumb { position: fixed; right: 18px; bottom: 22px; width: 176px; z-index: 900; display: none; cursor: pointer; font-family: Arial, sans-serif; }
+  body.recording #takeThumb { display: none !important; }
+  #takeThumb video { width: 100%; display: block; border-radius: 12px; border: 2px solid rgba(94, 234, 230, .85); background: #000;
+    box-shadow: 0 0 14px rgba(40, 201, 199, .4), 0 8px 18px rgba(0, 0, 0, .5); }
+  #thumbDur { position: absolute; right: 8px; top: 8px; background: rgba(0, 0, 0, .65); color: #fff; font-size: 12px; padding: 2px 7px; border-radius: 999px; }
+  #thumbSaved { position: absolute; left: 8px; top: 8px; background: rgba(20, 90, 50, .85); color: #d8ffe9; font-size: 12px; padding: 2px 7px; border-radius: 999px; display: none; }
+  #takeThumb .tcap { margin-top: 6px; text-align: center; color: #c9f5ff; font-size: 13px; text-shadow: 0 1px 6px rgba(0,0,0,.8); }
+  #saveNote { font-family: Arial, sans-serif; font-size: 13px; color: #8fa8a0; margin-top: 8px; }
   @keyframes blink { 50% { opacity: .15; } }
   #camMsg { position: fixed; left: 0; right: 0; bottom: 96px; z-index: 46; text-align: center;
     color: #ffb3c0; font-family: Arial, sans-serif; font-size: 15px; display: none; padding: 0 16px; }
@@ -182,6 +190,11 @@
   <button class="rtj-btn" id="camOffBtn"><span class="ic">✕</span><span class="lbl">Cam off</span></button>
   <label id="zoomWrap" style="display:none; align-items:center; gap:6px; color:#c9f5ff; font-family:Arial,sans-serif; font-size:.8rem;">Zoom <input type="range" id="zoomIn" step="0.1"></label>
 </div>
+<div id="takeThumb" title="Tap to watch your take">
+  <video id="thumbVideo" muted playsinline></video>
+  <span id="thumbDur">0:00</span><span id="thumbSaved">✓ Saved</span>
+  <div class="tcap">Your take — tap to watch</div>
+</div>
 <div id="camMsg"></div>
 <div id="takeView">
   <h2>Your take</h2>
@@ -191,7 +204,7 @@
     <button id="discardBtn">Discard &amp; back</button>
   </div>
   <p id="takeFmt" style="font-family:Arial,sans-serif; font-size:14px; color:#bbb; margin-top:10px;"></p>
-  <p id="saveNote" style="font-family:Arial,sans-serif; font-size:14px; color:#bbb; margin-top:6px;"></p>
+  <p id="saveNote"></p>
 </div>
 <div id="count"></div>
 <div id="hint">Space = play / pause &nbsp;·&nbsp; ↑ ↓ = speed &nbsp;·&nbsp; ← → = nudge &nbsp;·&nbsp; controls live on the screen edges</div>
@@ -388,7 +401,7 @@ const takeVideo = document.getElementById('takeVideo');
 const dlBtn = document.getElementById('dlBtn');
 let stream = null, recorder = null, chunks = [], recStart = 0, recTimer = null;
 let facing = 'user', camState = 'off';
-let takeBlob = null, takeName = '', usePicker = !!window.showSaveFilePicker;
+let takeBlob = null, takeName = '', lastTakeMs = 0, takeSaved = false;
 
 function fmtTime(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 
@@ -463,6 +476,7 @@ document.getElementById('flipBtn').addEventListener('click', async () => {
   if (camState !== 'off') await startCam();
 });
 document.getElementById('camOffBtn').addEventListener('click', cameraOff);
+document.getElementById('takeThumb').addEventListener('click', () => { if (takeBlob) takeView.classList.add('open'); });
 
 function pickMime() {
   const opts = ['video/mp4', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1.640028,mp4a.40.2',
@@ -491,6 +505,7 @@ function stopRecording() {
   clearInterval(recTimer);
   camState = 'preview';
   document.body.classList.remove('recording');
+  lastTakeMs = Date.now() - recStart;
   setRecUI('Start take');
   pause();
 }
@@ -510,35 +525,29 @@ function showTake() {
   document.getElementById('takeFmt').textContent = (ext === 'mp4')
     ? 'Recorded as MP4 (H.264) — opens straight into Premiere.'
     : 'Recorded as WebM — this browser could not record MP4. Selah can convert it for Premiere.';
-  document.getElementById('saveNote').innerHTML = '📁 When you save, this goes to your <b>Downloads</b> folder as ' + takeName;
-  takeView.classList.add('open');
+  takeSaved = false;
+  document.getElementById('thumbSaved').style.display = 'none';
+  document.getElementById('discardBtn').textContent = 'Discard & back';
+  document.getElementById('saveNote').textContent = 'Saves to your Downloads folder.';
+  const thumb = document.getElementById('takeThumb');
+  document.getElementById('thumbVideo').src = url;
+  document.getElementById('thumbDur').textContent = fmtTime(lastTakeMs);
+  thumb.style.display = 'block';
 }
-dlBtn.addEventListener('click', async (e) => {
-  const note = document.getElementById('saveNote');
+dlBtn.addEventListener('click', () => {
   if (!takeBlob) return;
-  if (usePicker) {
-    e.preventDefault();
-    try {
-      const handle = await window.showSaveFilePicker({ suggestedName: takeName,
-        types: [{ description: 'Video', accept: { [takeBlob.type.split(';')[0]]: ['.' + takeName.split('.').pop()] } }] });
-      const w = await handle.createWritable(); await w.write(takeBlob); await w.close();
-      note.textContent = '✓ Saved as ' + takeName + ' — in the folder you just picked.';
-    } catch (err) {
-      if (err && err.name === 'AbortError') { note.textContent = 'Save cancelled — your take is still here whenever you are ready.'; }
-      else {
-        usePicker = false;
-        note.textContent = '✓ Saved as ' + takeName + ' · in your Downloads folder.';
-        const a = document.createElement('a'); a.href = dlBtn.href; a.download = takeName; a.click();
-      }
-    }
-  } else {
-    note.innerHTML = '✓ Saved as ' + takeName + ' · in your Downloads folder. In Chrome, the download shows at the top-right of the browser — choose “Show in Finder” to jump straight to it.';
-  }
+  takeSaved = true;
+  document.getElementById('thumbSaved').style.display = 'block';
+  document.getElementById('saveNote').textContent = '✓ Saved to your Downloads folder.';
+  document.getElementById('discardBtn').textContent = 'Done — back to prompt';
 });
 document.getElementById('discardBtn').addEventListener('click', () => {
   takeView.classList.remove('open');
   takeVideo.removeAttribute('src'); takeVideo.load();
   takeBlob = null;
+  const thumb = document.getElementById('takeThumb');
+  thumb.style.display = 'none';
+  const tv = document.getElementById('thumbVideo'); tv.removeAttribute('src'); tv.load();
   cameraOff();
 });
 

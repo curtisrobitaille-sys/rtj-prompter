@@ -80,6 +80,26 @@
   #marker::after { right: 6px; border-right: 22px solid var(--gold); }
   #marker .line { position: absolute; left: 40px; right: 40px; top: 0;
     border-top: 1px solid rgba(201,162,39,.35); }
+  /* RTJ buttons + floating docks (Curtis's design package, Nov 9) */
+  .rtj-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    color: #c9f5ff; background: rgba(8, 28, 36, 0.65); border: 1.5px solid #28c9c7; cursor: pointer;
+    user-select: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 0 12px rgba(40, 201, 199, 0.35), inset 0 0 10px rgba(40, 201, 199, 0.2);
+    transition: all 0.2s ease-in-out; }
+  .rtj-btn:hover { background: rgba(14, 45, 58, 0.85); color: #ffffff; border-color: #5efffd;
+    box-shadow: 0 0 20px rgba(94, 255, 253, 0.6), inset 0 0 14px rgba(94, 255, 253, 0.25); }
+  .rtj-btn.on { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 16px rgba(201,162,77,.45), inset 0 0 10px rgba(201,162,77,.25); }
+  .rtj-btn.btn-record { border-color: #c9a24d; color: #f3d27a; box-shadow: 0 0 12px rgba(201,162,77,.4), inset 0 0 10px rgba(201,162,77,.22); }
+  .rtj-btn.btn-record:hover { border-color: #f3d27a; color: #ffe9a8; }
+  .floating-dock { position: fixed; top: var(--mark); transform: translateY(-50%); display: flex; flex-direction: column; gap: 18px; z-index: 1000; transition: opacity .25s; }
+  .dock-left { left: 24px; }
+  .dock-right { right: 24px; }
+  .floating-dock .rtj-btn { min-width: 150px; padding: 12px 24px; border-radius: 9999px; }
+  body.faded .floating-dock { opacity: 0; pointer-events: none; }
+  body.faded .floating-dock.near { opacity: 1; pointer-events: auto; }
+  body.recmode .floating-dock { display: none; }
   /* countdown */
   #count { position: fixed; inset: 0; z-index: 50; display: none;
     align-items: center; justify-content: center;
@@ -123,23 +143,22 @@
 
 <div id="topwrap">
 <div id="banner"><div class="b1">RTJ PROMPTER</div><div class="b2">RADIO &#8226; TELEVISION &#8226; JOURNALISM</div><div class="b3">NSCC IVANY CAMPUS &#8226; DARTMOUTH</div></div>
-<div id="bar">
-  <button id="playBtn">▶ Play</button>
-  <button id="restartBtn" title="Back to the top">⏮ Top</button>
-  <label>Speed <input type="range" id="speed" min="10" max="300" value="90"><span class="val" id="speedVal">90</span></label>
-  <label>Text size <input type="range" id="fsize" min="32" max="120" value="64"><span class="val" id="fsizeVal">64</span></label>
-  <button id="mirrorBtn" title="Mirror the text for a through-the-glass prompter">🪞 Mirror</button>
-  <button id="camBtn" title="Prompt over the camera and record the take">🎥 Record mode</button>
-  <button id="editBtn">✎ Edit script</button>
-  <span class="spacer"></span>
-  <button id="fsBtn" title="Full screen">⛶ Full screen</button>
-</div>
 </div>
 
 <div id="stage">
   <video id="cam" autoplay playsinline muted></video>
   <div id="scroller"><div id="text"></div></div>
   <div id="marker"><div class="line"></div></div>
+<div class="floating-dock dock-left">
+  <button class="rtj-btn" data-act="play">▶ Play</button>
+  <button class="rtj-btn" data-act="top">↑ Top</button>
+  <button class="rtj-btn" data-act="mirror">⧉ Mirror</button>
+</div>
+<div class="floating-dock dock-right">
+  <button class="rtj-btn btn-record" data-act="rec">⦿ Record</button>
+  <button class="rtj-btn" data-act="edit">✎ Edit</button>
+  <button class="rtj-btn" data-act="fs">⛶ Fullscreen</button>
+</div>
 </div>
 <div id="recbar">
   <span id="recDot"></span>
@@ -158,10 +177,15 @@
   </div>
 </div>
 <div id="count"></div>
-<div id="hint">Space = play / pause &nbsp;·&nbsp; ↑ ↓ = speed &nbsp;·&nbsp; ← → = nudge &nbsp;·&nbsp; move the mouse to the top for controls</div>
+<div id="hint">Space = play / pause &nbsp;·&nbsp; ↑ ↓ = speed &nbsp;·&nbsp; ← → = nudge &nbsp;·&nbsp; controls live on the screen edges</div>
 
 <div id="editView">
   <h2>Your script</h2>
+  <div id="setupRow" style="display:flex; gap:26px; flex-wrap:wrap; margin:0 0 14px; font-family:Arial,sans-serif; font-size:14px; color:#bbb;">
+    <label>Speed <input type="range" id="speed" min="10" max="300" value="90"><span class="val" id="speedVal">90</span></label>
+    <label>Text size <input type="range" id="fsize" min="32" max="120" value="64"><span class="val" id="fsizeVal">64</span></label>
+  </div>
+
   <textarea id="scriptBox"></textarea>
   <div class="row">
     <button id="saveScript">Save &amp; prompt</button>
@@ -186,7 +210,6 @@ I'm Curtis Robitaille, WTV News, Dartmouth.`;
 
 const textEl = document.getElementById('text');
 const scroller = document.getElementById('scroller');
-const playBtn = document.getElementById('playBtn');
 const topwrap = document.getElementById('topwrap');
 const countEl = document.getElementById('count');
 const speedIn = document.getElementById('speed');
@@ -210,18 +233,20 @@ function tick(t) {
   apply();
   raf = requestAnimationFrame(tick);
 }
+function setPlayUI(icon, label) { document.querySelectorAll('[data-act="play"]').forEach(b => b.textContent = icon + ' ' + label); }
 function play() {
   if (playing) return;
-  playing = true; playBtn.textContent = '⏸ Pause'; lastT = null;
+  playing = true; setPlayUI('⏸', 'Pause'); lastT = null;
   raf = requestAnimationFrame(tick);
   clearTimeout(hideTimer);
-  hideTimer = setTimeout(() => topwrap.classList.add('fade'), 2500);
+  hideTimer = setTimeout(() => { topwrap.classList.add('fade'); document.body.classList.add('faded'); }, 2500);
 }
 function pause() {
-  playing = false; playBtn.textContent = '▶ Play';
+  playing = false; setPlayUI('▶', 'Play');
   if (raf) cancelAnimationFrame(raf);
   clearTimeout(hideTimer);
   topwrap.classList.remove('fade');
+  document.body.classList.remove('faded');
 }
 function countdownThenPlay() {
   if (playing) { pause(); return; }
@@ -234,21 +259,19 @@ function countdownThenPlay() {
 }
 function toTop() { pause(); y = 0; apply(); }
 
-playBtn.addEventListener('click', countdownThenPlay);
-document.getElementById('restartBtn').addEventListener('click', toTop);
-speedIn.addEventListener('input', () => { speed = +speedIn.value; document.getElementById('speedVal').textContent = speed; });
-fsizeIn.addEventListener('input', () => { textEl.style.fontSize = fsizeIn.value + 'px'; document.getElementById('fsizeVal').textContent = fsizeIn.value; clampY(); apply(); });
-document.getElementById('mirrorBtn').addEventListener('click', (e) => {
-  mirrored = !mirrored; textEl.classList.toggle('mirror', mirrored); e.currentTarget.classList.toggle('on', mirrored);
-});
-document.getElementById('fsBtn').addEventListener('click', () => {
-  if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen();
-});
+document.querySelectorAll('.floating-dock .rtj-btn').forEach(b => b.addEventListener('click', () => {
+  const act = b.dataset.act;
+  if (act === 'play') countdownThenPlay();
+  else if (act === 'top') toTop();
+  else if (act === 'mirror') { mirrored = !mirrored; textEl.classList.toggle('mirror', mirrored); document.querySelectorAll('[data-act="mirror"]').forEach(x => x.classList.toggle('on', mirrored)); }
+  else if (act === 'edit') { pause(); scriptBox.value = script; renderLib(); editView.classList.add('open'); }
+  else if (act === 'fs') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
+  else if (act === 'rec') toggleRecMode();
+}));
 
 /* edit view */
 const editView = document.getElementById('editView');
 const scriptBox = document.getElementById('scriptBox');
-document.getElementById('editBtn').addEventListener('click', () => { pause(); scriptBox.value = script; renderLib(); editView.classList.add('open'); });
 document.getElementById('cancelEdit').addEventListener('click', () => editView.classList.remove('open'));
 document.getElementById('saveScript').addEventListener('click', () => {
   script = scriptBox.value; localStorage.setItem('prompterScript', script);
@@ -317,14 +340,16 @@ document.getElementById('stage').addEventListener('wheel', (e) => { pause(); y +
 let hideTimer = null;
 document.addEventListener('mousemove', (e) => {
   topwrap.classList.remove('fade');
+  document.body.classList.remove('faded');
+  const near = e.clientX < 110 || e.clientX > window.innerWidth - 110;
+  document.querySelectorAll('.floating-dock').forEach(s => s.classList.toggle('near', near));
   clearTimeout(hideTimer);
-  if (e.clientY > 240) hideTimer = setTimeout(() => { if (playing) topwrap.classList.add('fade'); }, 2500);
+  if (e.clientY > 240) hideTimer = setTimeout(() => { if (playing) { topwrap.classList.add('fade'); document.body.classList.add('faded'); } }, 2500);
 });
 
 window.addEventListener('resize', () => { clampY(); apply(); });
 
 /* ---------- record mode ---------- */
-const camBtn = document.getElementById('camBtn');
 const cam = document.getElementById('cam');
 const camMsg = document.getElementById('camMsg');
 const recBtn = document.getElementById('recBtn');
@@ -362,18 +387,17 @@ async function toggleRecMode() {
     }
     recMode = true;
     document.body.classList.add('recmode');
-    camBtn.classList.add('on'); camBtn.textContent = '🎥 Record mode: on';
+    document.querySelectorAll('[data-act="rec"]').forEach(b => { b.classList.add('on'); b.textContent = '⦿ Record: on'; });
     await startCam();
   } else {
     recMode = false;
     document.body.classList.remove('recmode');
-    camBtn.classList.remove('on'); camBtn.textContent = '🎥 Record mode';
+    document.querySelectorAll('[data-act="rec"]').forEach(b => { b.classList.remove('on'); b.textContent = '⦿ Record'; });
     if (recorder && recorder.state === 'recording') stopRecording();
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     pause();
   }
 }
-camBtn.addEventListener('click', toggleRecMode);
 
 document.getElementById('flipBtn').addEventListener('click', async () => {
   facing = (facing === 'user') ? 'environment' : 'user';

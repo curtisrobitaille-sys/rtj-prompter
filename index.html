@@ -42,6 +42,15 @@
   #editView { position: fixed; inset: 0; z-index: 1200; background: #0a0a0b;
     display: none; flex-direction: column; padding: 24px 20px 20px; }
   #editView.open { display: flex; }
+  #hdrTools { position: absolute; top: 10px; right: 14px; z-index: 5; display: flex; gap: 10px; align-items: stretch;
+    background: rgba(6, 24, 32, .55); border: 1px solid rgba(94, 234, 230, .35); border-radius: 14px; padding: 8px 10px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-family: Arial, sans-serif; }
+  #hdrTools .htool { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  #hdrTools .hval { font-size: 12px; color: var(--gold); min-height: 14px; }
+  #hdrTools .hlab { font-size: 10px; letter-spacing: .12em; color: #9fd8d4; text-transform: uppercase; }
+  #hdrTools input[type="range"] { writing-mode: vertical-lr; direction: rtl; width: 22px; height: 92px; accent-color: #28c9c7; cursor: pointer; }
+  #hdrEdit { min-width: 0; padding: 6px 12px 6px 7px; border-radius: 9999px; font-size: .78rem; gap: 8px; align-self: center; }
+  #hdrEdit .ic { width: 28px; height: 28px; font-size: 14px; }
   #editView h2 { font-family: Arial, sans-serif; font-size: 18px; color: var(--gold); margin-bottom: 10px; }
   #scriptBox { flex: 1; width: 100%; background: #141416; color: var(--ink);
     border: 1px solid #333; border-radius: 10px; padding: 16px;
@@ -185,7 +194,13 @@
 <body>
 
 <div id="topwrap">
+<div id="hdrTools">
+  <div class="htool"><span class="hval" id="speedVal">90</span><input type="range" id="speed" min="10" max="300" value="90"><span class="hlab">Speed</span></div>
+  <div class="htool"><span class="hval" id="fsizeVal">64</span><input type="range" id="fsize" min="32" max="120" value="64"><span class="hlab">Text</span></div>
+  <button id="hdrEdit" class="rtj-btn"><span class="ic">✎</span><span class="lbl">Edit</span></button>
+</div>
 <div id="banner"><div class="b1">RTJ PROMPTER</div><div class="b2">RADIO &#8226; TELEVISION &#8226; JOURNALISM</div><div class="b3">NSCC IVANY CAMPUS &#8226; DARTMOUTH</div></div>
+</div>
 </div>
 
 <div id="stage">
@@ -238,10 +253,6 @@
 
 <div id="editView">
   <h2>Your script</h2>
-  <div id="setupRow" style="display:flex; gap:26px; flex-wrap:wrap; margin:0 0 14px; font-family:Arial,sans-serif; font-size:14px; color:#bbb;">
-    <label>Speed <input type="range" id="speed" min="10" max="300" value="90"><span class="val" id="speedVal">90</span></label>
-    <label>Text size <input type="range" id="fsize" min="32" max="120" value="64"><span class="val" id="fsizeVal">64</span></label>
-  </div>
 
   <textarea id="scriptBox"></textarea>
   <div class="row">
@@ -275,6 +286,9 @@ const fsizeIn = document.getElementById('fsize');
 let script = localStorage.getItem('prompterScript') || DEFAULT_SCRIPT;
 let y = 0, playing = false, speed = +speedIn.value, lastT = null, raf = null;
 let mirrored = false;
+speedIn.addEventListener('input', () => { speed = +speedIn.value; document.getElementById('speedVal').textContent = speed; });
+fsizeIn.addEventListener('input', () => { const v = +fsizeIn.value; textEl.style.fontSize = v + 'px'; document.getElementById('fsizeVal').textContent = v; clampY(); apply(); });
+textEl.style.fontSize = fsizeIn.value + 'px';
 
 function render() { textEl.textContent = script.replace(/\s+$/, ''); }
 function maxScroll() { return Math.max(0, scroller.offsetHeight - window.innerHeight); }
@@ -626,6 +640,7 @@ document.getElementById('discardBtn').addEventListener('click', () => {
   refreshThumb();
   cameraOff();
 });
+document.getElementById('hdrEdit').addEventListener('click', () => { document.querySelector('[data-act="edit"]').click(); });
 document.getElementById('takesBtn').addEventListener('click', () => { pause(); renderShelf(); document.getElementById('takesView').classList.add('open'); });
 document.getElementById('takesClose').addEventListener('click', () => document.getElementById('takesView').classList.remove('open'));
 

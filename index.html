@@ -113,7 +113,7 @@
     font-family: Arial, sans-serif; font-size: 13px; color: #777; pointer-events: none; }
 
   /* ---------- record mode ---------- */
-  #cam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  #cam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: none; background: #000; }
   #cam.front { transform: scaleX(-1); }
   body.recmode #cam { display: block; }
   body.recmode #text { text-shadow: 0 2px 14px rgba(0,0,0,.92), 0 0 6px rgba(0,0,0,.92); }
@@ -170,6 +170,7 @@
   <button id="recBtn">● Record</button>
   <span id="recTime">0:00</span>
   <button id="flipBtn" title="Front / back camera">⇄ Camera</button>
+  <label id="zoomWrap" style="display:none; align-items:center; gap:6px;">Zoom <input type="range" id="zoomIn" step="0.1"></label>
 </div>
 <div id="camMsg"></div>
 <div id="takeView">
@@ -384,16 +385,33 @@ function fmtTime(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60
 async function startCam() {
   try {
     if (stream) stream.getTracks().forEach(t => t.stop());
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing }, audio: true });
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true });
     cam.srcObject = stream;
     cam.classList.toggle('front', facing === 'user');
     camMsg.style.display = 'none';
+    setupZoom();
     return true;
   } catch (e) {
     camMsg.textContent = 'The camera could not be opened here. Prompt mode still works — some browsers block camera recording.';
     camMsg.style.display = 'block';
     return false;
   }
+}
+
+/* zoom-out control — only appears when the camera itself reports a zoom range */
+function setupZoom() {
+  const wrap = document.getElementById('zoomWrap');
+  const zin = document.getElementById('zoomIn');
+  try {
+    const track = stream.getVideoTracks()[0];
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+    if (caps.zoom) {
+      zin.min = caps.zoom.min; zin.max = caps.zoom.max;
+      zin.value = (track.getSettings && track.getSettings().zoom) || caps.zoom.min;
+      wrap.style.display = 'flex';
+      zin.oninput = () => track.applyConstraints({ advanced: [{ zoom: +zin.value }] }).catch(() => {});
+    } else { wrap.style.display = 'none'; }
+  } catch (e) { wrap.style.display = 'none'; }
 }
 
 async function toggleRecMode() {

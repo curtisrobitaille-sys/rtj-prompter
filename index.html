@@ -180,6 +180,7 @@
     <a id="dlBtn" href="#" download="rtj-take.webm">⬇ Save the video</a>
     <button id="discardBtn">Discard &amp; back</button>
   </div>
+  <p id="takeFmt" style="font-family:Arial,sans-serif; font-size:14px; color:#bbb; margin-top:10px;"></p>
 </div>
 <div id="count"></div>
 <div id="hint">Space = play / pause &nbsp;·&nbsp; ↑ ↓ = speed &nbsp;·&nbsp; ← → = nudge &nbsp;·&nbsp; controls live on the screen edges</div>
@@ -442,7 +443,8 @@ document.getElementById('flipBtn').addEventListener('click', async () => {
 document.getElementById('recPlayBtn').addEventListener('click', countdownThenPlay);
 
 function pickMime() {
-  const opts = ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+  const opts = ['video/mp4', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1.640028,mp4a.40.2',
+    'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
   for (const o of opts) { try { if (MediaRecorder.isTypeSupported(o)) return o; } catch (e) {} }
   return '';
 }
@@ -487,6 +489,9 @@ function showTake() {
   takeVideo.src = url;
   dlBtn.href = url;
   dlBtn.download = 'rtj-take.' + (type.indexOf('mp4') >= 0 ? 'mp4' : 'webm');
+  document.getElementById('takeFmt').textContent = (type.indexOf('mp4') >= 0)
+    ? 'Saved as MP4 (H.264) — opens straight into Premiere.'
+    : 'Saved as WebM — this browser could not record MP4. Selah can convert it for Premiere.';
   takeView.classList.add('open');
 }
 document.getElementById('discardBtn').addEventListener('click', () => {

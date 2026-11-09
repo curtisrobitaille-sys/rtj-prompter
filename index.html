@@ -42,13 +42,14 @@
   #editView { position: fixed; inset: 0; z-index: 1200; background: #0a0a0b;
     display: none; flex-direction: column; padding: 24px 20px 20px; }
   #editView.open { display: flex; }
-  #hdrTools { position: absolute; top: 10px; right: 14px; z-index: 5; display: flex; gap: 10px; align-items: stretch;
+  #hdrTools, #lineTools { position: absolute; top: 10px; right: 14px; z-index: 5; display: flex; gap: 10px; align-items: stretch;
     background: rgba(6, 24, 32, .55); border: 1px solid rgba(94, 234, 230, .35); border-radius: 14px; padding: 8px 10px;
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-family: Arial, sans-serif; }
-  #hdrTools .htool { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  #hdrTools .hval { font-size: 12px; color: var(--gold); min-height: 14px; }
-  #hdrTools .hlab { font-size: 10px; letter-spacing: .12em; color: #9fd8d4; text-transform: uppercase; }
-  #hdrTools input[type="range"] { writing-mode: vertical-lr; direction: rtl; width: 22px; height: 92px; accent-color: #28c9c7; cursor: pointer; }
+  #hdrTools .htool, #lineTools .htool { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  #hdrTools .hval, #lineTools .hval { font-size: 12px; color: var(--gold); min-height: 14px; }
+  #hdrTools .hlab, #lineTools .hlab { font-size: 10px; letter-spacing: .12em; color: #9fd8d4; text-transform: uppercase; }
+  #hdrTools input[type="range"], #lineTools input[type="range"] { writing-mode: vertical-lr; direction: rtl; width: 22px; height: 92px; accent-color: #28c9c7; cursor: pointer; }
+  #lineTools { left: 14px; right: auto; }
   #hdrEdit { min-width: 0; padding: 6px 12px 6px 7px; border-radius: 9999px; font-size: .78rem; gap: 8px; align-self: center; }
   #hdrEdit .ic { width: 28px; height: 28px; font-size: 14px; }
   #editView h2 { font-family: Arial, sans-serif; font-size: 18px; color: var(--gold); margin-bottom: 10px; }
@@ -194,6 +195,9 @@
 <body>
 
 <div id="topwrap">
+<div id="lineTools">
+  <div class="htool"><span class="hval" id="lineVal">55</span><input type="range" id="linepos" min="15" max="85" value="55"><span class="hlab">Line</span></div>
+</div>
 <div id="hdrTools">
   <div class="htool"><span class="hval" id="speedVal">90</span><input type="range" id="speed" min="10" max="300" value="90"><span class="hlab">Speed</span></div>
   <div class="htool"><span class="hval" id="fsizeVal">64</span><input type="range" id="fsize" min="32" max="120" value="64"><span class="hlab">Text</span></div>
@@ -206,7 +210,7 @@
 <div id="stage">
   <video id="cam" autoplay playsinline muted></video>
   <div id="scroller"><div id="text"></div></div>
-  <div id="marker"><div class="line"></div><div class="grab" title="Drag to move the reading line"></div></div>
+  <div id="marker"><div class="line"></div></div>
 <div class="floating-dock dock-left">
   <button class="rtj-btn" data-act="play"><span class="ic">▶</span><span class="lbl">Play</span></button>
   <button class="rtj-btn" data-act="top"><span class="ic"><span class="uarr">↑</span></span><span class="lbl">Top</span></button>
@@ -424,15 +428,11 @@ window.addEventListener('resize', () => { applyMark(); clampY(); apply(); });
 let markFrac = parseFloat(localStorage.getItem('prompterMarkFrac')) || 0.55;
 function applyMark() { document.documentElement.style.setProperty('--mark', (markFrac * window.innerHeight) + 'px'); }
 applyMark();
-const grabEl = document.querySelector('#marker .grab');
-let draggingLine = false;
-grabEl.addEventListener('pointerdown', (e) => { draggingLine = true; grabEl.setPointerCapture(e.pointerId); e.preventDefault(); });
-grabEl.addEventListener('pointermove', (e) => {
-  if (!draggingLine) return;
-  markFrac = Math.min(0.85, Math.max(0.15, e.clientY / window.innerHeight));
-  applyMark(); clampY(); apply();
-});
-grabEl.addEventListener('pointerup', () => { draggingLine = false; localStorage.setItem('prompterMarkFrac', markFrac); });
+const lineIn = document.getElementById('linepos');
+lineIn.value = Math.round(markFrac * 100);
+document.getElementById('lineVal').textContent = lineIn.value;
+lineIn.addEventListener('input', () => { markFrac = lineIn.value / 100; applyMark(); clampY(); apply(); document.getElementById('lineVal').textContent = lineIn.value; });
+lineIn.addEventListener('change', () => { localStorage.setItem('prompterMarkFrac', markFrac); });
 
 /* ---------- record mode ---------- */
 const cam = document.getElementById('cam');

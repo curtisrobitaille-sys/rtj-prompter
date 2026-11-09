@@ -52,6 +52,19 @@
   #lineTools { left: 14px; right: auto; }
   #hdrEdit { min-width: 0; padding: 6px 12px 6px 7px; border-radius: 9999px; font-size: .78rem; gap: 8px; align-self: center; }
   #hdrEdit .ic { width: 28px; height: 28px; font-size: 14px; }
+  #quickEdit { position: fixed; inset: 0; z-index: 1250; display: none; align-items: flex-start; justify-content: center;
+    background: rgba(2, 8, 12, .55); }
+  #quickEdit.open { display: flex; }
+  .qe-card { margin-top: 104px; width: min(680px, 92vw); border-radius: 18px; padding: 18px;
+    background: linear-gradient(160deg, rgba(16, 58, 66, .94), rgba(6, 24, 32, .96));
+    border: 1.5px solid rgba(94, 234, 230, .45); box-shadow: 0 18px 50px rgba(0, 0, 0, .6), 0 0 24px rgba(40, 201, 199, .18);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-family: Arial, sans-serif; }
+  .qe-title { color: var(--gold); letter-spacing: .14em; font-size: 13px; text-transform: uppercase; margin-bottom: 10px; }
+  #qeBox { width: 100%; height: 38vh; background: rgba(0, 0, 0, .45); color: #fff; font-size: 17px; line-height: 1.5;
+    border: 1px solid rgba(94, 234, 230, .3); border-radius: 12px; padding: 12px; resize: vertical; font-family: Georgia, serif; }
+  .qe-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 14px; }
+  .qe-row .rtj-btn { min-width: 0; padding: 8px 16px 8px 9px; font-size: .85rem; }
+  .qe-row .rtj-btn .ic { width: 30px; height: 30px; font-size: 15px; }
   #editView h2 { font-family: Arial, sans-serif; font-size: 18px; color: var(--gold); margin-bottom: 10px; }
   #scriptBox { flex: 1; width: 100%; background: #141416; color: var(--ink);
     border: 1px solid #333; border-radius: 10px; padding: 16px;
@@ -199,10 +212,10 @@
   <div class="htool"><span class="hval" id="lineVal">55</span><input type="range" id="linepos" min="15" max="85" value="55"><span class="hlab">Line</span></div>
 </div>
 <div id="hdrTools">
-  <div class="htool"><span class="hval" id="speedVal">90</span><input type="range" id="speed" min="10" max="300" value="90"><span class="hlab">Speed</span></div>
-  <div class="htool"><span class="hval" id="fsizeVal">64</span><input type="range" id="fsize" min="32" max="120" value="64"><span class="hlab">Text</span></div>
   <button id="hdrEdit" class="rtj-btn"><span class="ic">✎</span><span class="lbl">Edit</span></button>
-</div>
+<div class="htool"><span class="hval" id="speedVal">90</span><input type="range" id="speed" min="10" max="300" value="90"><span class="hlab">Speed</span></div>
+  <div class="htool"><span class="hval" id="fsizeVal">64</span><input type="range" id="fsize" min="32" max="120" value="64"><span class="hlab">Text</span></div>
+  </div>
 <div id="banner"><div class="b1">RTJ PROMPTER</div><div class="b2">RADIO &#8226; TELEVISION &#8226; JOURNALISM</div><div class="b3">NSCC IVANY CAMPUS &#8226; DARTMOUTH</div></div>
 </div>
 </div>
@@ -255,6 +268,16 @@
 <div id="count"></div>
 <div id="hint">Space = play / pause &nbsp;·&nbsp; ↑ ↓ = speed &nbsp;·&nbsp; ← → = nudge &nbsp;·&nbsp; controls live on the screen edges</div>
 
+<div id="quickEdit">
+  <div class="qe-card">
+    <div class="qe-title">Edit script</div>
+    <textarea id="qeBox" spellcheck="false"></textarea>
+    <div class="qe-row">
+      <button id="qeCancel" class="rtj-btn"><span class="ic">✕</span><span class="lbl">Cancel</span></button>
+      <button id="qeSave" class="rtj-btn on"><span class="ic">✓</span><span class="lbl">Save changes</span></button>
+    </div>
+  </div>
+</div>
 <div id="editView">
   <h2>Your script</h2>
 
@@ -399,7 +422,7 @@ document.getElementById('libSaveBtn').addEventListener('click', () => {
 
 /* keyboard */
 document.addEventListener('keydown', (e) => {
-  if (editView.classList.contains('open')) return;
+  if (editView.classList.contains('open') || quickEdit.classList.contains('open')) return;
   if (e.code === 'Space') { e.preventDefault(); countdownThenPlay(); }
   else if (e.key === 'ArrowUp') { speed = Math.min(300, speed + 10); speedIn.value = speed; document.getElementById('speedVal').textContent = speed; }
   else if (e.key === 'ArrowDown') { speed = Math.max(10, speed - 10); speedIn.value = speed; document.getElementById('speedVal').textContent = speed; }
@@ -640,7 +663,14 @@ document.getElementById('discardBtn').addEventListener('click', () => {
   refreshThumb();
   cameraOff();
 });
-document.getElementById('hdrEdit').addEventListener('click', () => { document.querySelector('[data-act="edit"]').click(); });
+const quickEdit = document.getElementById('quickEdit');
+const qeBox = document.getElementById('qeBox');
+document.getElementById('hdrEdit').addEventListener('click', () => { pause(); qeBox.value = script; quickEdit.classList.add('open'); qeBox.focus(); });
+document.getElementById('qeCancel').addEventListener('click', () => quickEdit.classList.remove('open'));
+document.getElementById('qeSave').addEventListener('click', () => {
+  script = qeBox.value; localStorage.setItem('prompterScript', script);
+  render(); toTop(); quickEdit.classList.remove('open');
+});
 document.getElementById('takesBtn').addEventListener('click', () => { pause(); renderShelf(); document.getElementById('takesView').classList.add('open'); });
 document.getElementById('takesClose').addEventListener('click', () => document.getElementById('takesView').classList.remove('open'));
 

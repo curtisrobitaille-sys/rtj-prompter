@@ -149,6 +149,24 @@
   #thumbSaved { position: absolute; left: 8px; top: 8px; background: rgba(20, 90, 50, .85); color: #d8ffe9; font-size: 12px; padding: 2px 7px; border-radius: 999px; display: none; }
   #takeThumb .tcap { margin-top: 6px; text-align: center; color: #c9f5ff; font-size: 13px; text-shadow: 0 1px 6px rgba(0,0,0,.8); }
   #saveNote { font-family: Arial, sans-serif; font-size: 13px; color: #8fa8a0; margin-top: 8px; }
+  #takesWrap { position: fixed; left: 0; top: calc(50% + 128px); display: none; z-index: 1000; transition: opacity .3s ease; }
+  body.faded #takesWrap, body.recording #takesWrap { opacity: 0; pointer-events: none; }
+  #takesWrap .rtj-btn { min-width: 158px; justify-content: flex-start; padding: 7px 8px 7px 30px; border-radius: 9999px; font-size: .78rem; gap: 9px; }
+  #takesWrap .rtj-btn .ic { width: 30px; height: 30px; font-size: 14px; }
+  #takesView { position: fixed; inset: 0; z-index: 60; background: rgba(4, 10, 14, .97); display: none; flex-direction: column; padding: 24px 20px; font-family: Arial, sans-serif; overflow-y: auto; }
+  #takesView.open { display: flex; }
+  #takesView h2 { color: var(--gold); font-size: 20px; margin-bottom: 4px; }
+  #takesView .sub { color: #8fa8a0; font-size: 13px; margin-bottom: 16px; }
+  #takesRow { display: flex; flex-direction: row; flex-wrap: wrap; gap: 16px; }
+  .tcard { width: 216px; background: rgba(10, 30, 38, .8); border: 1.5px solid rgba(94, 234, 230, .4); border-radius: 14px; padding: 10px; }
+  .tcard video { width: 100%; border-radius: 8px; background: #000; display: block; }
+  .tcard .tmeta { display: flex; justify-content: space-between; color: #c9f5ff; font-size: 13px; margin: 8px 2px; }
+  .tcard .tsaved { color: #7fe6ae; }
+  .tcard .trow { display: flex; gap: 6px; }
+  .tcard button { flex: 1; border-radius: 8px; padding: 9px 4px; font-size: 13px; min-height: 40px; cursor: pointer; background: #12303a; color: #d9fbff; border: 1px solid rgba(94, 234, 230, .5); }
+  .tcard button.tsave { background: var(--gold); color: #000; font-weight: 700; border-color: var(--gold); }
+  .tcard button.tdel { background: #1c1c1f; color: #ffb3c0; border-color: #3a3a3e; }
+  #takesClose { margin-top: 20px; align-self: flex-start; border-radius: 8px; padding: 12px 22px; font-size: 15px; min-height: 48px; cursor: pointer; background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; }
   @keyframes blink { 50% { opacity: .15; } }
   #camMsg { position: fixed; left: 0; right: 0; bottom: 96px; z-index: 46; text-align: center;
     color: #ffb3c0; font-family: Arial, sans-serif; font-size: 15px; display: none; padding: 0 16px; }
@@ -190,6 +208,9 @@
   <button class="rtj-btn" id="camOffBtn"><span class="ic">✕</span><span class="lbl">Cam off</span></button>
   <label id="zoomWrap" style="display:none; align-items:center; gap:6px; color:#c9f5ff; font-family:Arial,sans-serif; font-size:.8rem;">Zoom <input type="range" id="zoomIn" step="0.1"></label>
 </div>
+<div id="takesWrap">
+  <button class="rtj-btn" id="takesBtn"><span class="ic">🎞</span><span class="lbl">Takes · 0</span></button>
+</div>
 <div id="takeThumb" title="Tap to watch your take">
   <video id="thumbVideo" muted playsinline></video>
   <span id="thumbDur">0:00</span><span id="thumbSaved">✓ Saved</span>
@@ -205,6 +226,12 @@
   </div>
   <p id="takeFmt" style="font-family:Arial,sans-serif; font-size:14px; color:#bbb; margin-top:10px;"></p>
   <p id="saveNote"></p>
+</div>
+<div id="takesView">
+  <h2>Your takes</h2>
+  <p class="sub">This session's takes, newest first. Save the keepers — saved videos live in your Downloads folder for good.</p>
+  <div id="takesRow"></div>
+  <button id="takesClose">Back to prompt</button>
 </div>
 <div id="count"></div>
 <div id="hint">Space = play / pause &nbsp;·&nbsp; ↑ ↓ = speed &nbsp;·&nbsp; ← → = nudge &nbsp;·&nbsp; controls live on the screen edges</div>
@@ -400,8 +427,8 @@ const takeView = document.getElementById('takeView');
 const takeVideo = document.getElementById('takeVideo');
 const dlBtn = document.getElementById('dlBtn');
 let stream = null, recorder = null, chunks = [], recStart = 0, recTimer = null;
-let facing = 'user', camState = 'off';
-let takeBlob = null, takeName = '', lastTakeMs = 0, takeSaved = false;
+let facing = 'user', camState = 'off', countdownIv = null;
+let takes = [], currentTake = null, lastTakeMs = 0;
 
 function fmtTime(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 
@@ -440,6 +467,7 @@ function setupZoom() {
 function setRecUI(label) { document.querySelectorAll('[data-act="rec"]').forEach(b => b.querySelector('.lbl').textContent = label); }
 async function recButtonFlow() {
   if (camState === 'recording') { stopRecording(); return; }
+  if (camState === 'countdown') { return; }
   if (camState === 'preview') { startCountdownToTake(); return; }
   if (!navigator.mediaDevices || !window.MediaRecorder) {
     camMsg.textContent = 'This browser cannot record video. Prompt mode still works.';
@@ -454,6 +482,7 @@ async function recButtonFlow() {
 }
 function cameraOff() {
   if (camState === 'recording') return;
+  if (camState === 'countdown') { clearInterval(countdownIv); countEl.style.display = 'none'; }
   camState = 'off';
   document.body.classList.remove('camon');
   if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
@@ -462,11 +491,13 @@ function cameraOff() {
   setRecUI('Record');
 }
 function startCountdownToTake() {
+  if (camState !== 'preview') return;
+  camState = 'countdown';
   if (playing) pause();
   let n = 3; countEl.style.display = 'flex'; countEl.textContent = n;
-  const iv = setInterval(() => {
+  countdownIv = setInterval(() => {
     n--;
-    if (n <= 0) { clearInterval(iv); countEl.style.display = 'none'; beginTake(); }
+    if (n <= 0) { clearInterval(countdownIv); countEl.style.display = 'none'; beginTake(); }
     else countEl.textContent = n;
   }, 800);
 }
@@ -476,7 +507,7 @@ document.getElementById('flipBtn').addEventListener('click', async () => {
   if (camState !== 'off') await startCam();
 });
 document.getElementById('camOffBtn').addEventListener('click', cameraOff);
-document.getElementById('takeThumb').addEventListener('click', () => { if (takeBlob) takeView.classList.add('open'); });
+document.getElementById('takeThumb').addEventListener('click', () => { if (takes.length) openTake(takes[takes.length - 1]); });
 
 function pickMime() {
   const opts = ['video/mp4', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1.640028,mp4a.40.2',
@@ -486,6 +517,7 @@ function pickMime() {
 }
 
 function beginTake() {
+  if (!stream) { cameraOff(); return; }
   const mime = pickMime();
   chunks = [];
   recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
@@ -511,45 +543,91 @@ function stopRecording() {
 }
 
 
+function refreshThumb() {
+  const latest = takes[takes.length - 1];
+  document.getElementById('takesWrap').style.display = takes.length ? 'block' : 'none';
+  document.querySelector('#takesBtn .lbl').textContent = 'Takes · ' + takes.length;
+  const thumb = document.getElementById('takeThumb');
+  if (!latest) { thumb.style.display = 'none'; return; }
+  document.getElementById('thumbVideo').src = latest.url;
+  document.getElementById('thumbDur').textContent = fmtTime(latest.ms);
+  document.getElementById('thumbSaved').style.display = latest.saved ? 'block' : 'none';
+  thumb.style.display = 'block';
+}
+function openTake(t) {
+  currentTake = t;
+  takeVideo.src = t.url;
+  dlBtn.href = t.url;
+  dlBtn.download = t.name;
+  document.getElementById('takeFmt').textContent = (t.ext === 'mp4')
+    ? 'Recorded as MP4 (H.264) — opens straight into Premiere.'
+    : 'Recorded as WebM — this browser could not record MP4. Selah can convert it for Premiere.';
+  document.getElementById('saveNote').textContent = t.saved ? '✓ Saved to your Downloads folder.' : 'Saves to your Downloads folder.';
+  document.getElementById('discardBtn').textContent = t.saved ? 'Done — back to prompt' : 'Discard & back';
+  takeView.classList.add('open');
+}
+function renderShelf() {
+  const row = document.getElementById('takesRow');
+  row.innerHTML = '';
+  [...takes].reverse().forEach(t => {
+    const card = document.createElement('div'); card.className = 'tcard';
+    const v = document.createElement('video'); v.src = t.url; v.muted = true; v.playsInline = true; v.preload = 'metadata';
+    const meta = document.createElement('div'); meta.className = 'tmeta';
+    meta.innerHTML = '<span>' + fmtTime(t.ms) + ' · ' + t.when + '</span>' + (t.saved ? '<span class="tsaved">✓ Saved</span>' : '');
+    const brow = document.createElement('div'); brow.className = 'trow';
+    const bw = document.createElement('button'); bw.textContent = '▶ Watch';
+    bw.addEventListener('click', () => { document.getElementById('takesView').classList.remove('open'); openTake(t); });
+    const bs = document.createElement('button'); bs.textContent = '⬇ Save'; bs.className = 'tsave';
+    bs.addEventListener('click', () => {
+      const a = document.createElement('a'); a.href = t.url; a.download = t.name; a.click();
+      t.saved = true; renderShelf(); refreshThumb();
+    });
+    const bd = document.createElement('button'); bd.textContent = 'Delete'; bd.className = 'tdel';
+    bd.addEventListener('click', () => {
+      takes = takes.filter(x => x !== t);
+      URL.revokeObjectURL(t.url);
+      if (currentTake === t) currentTake = null;
+      renderShelf(); refreshThumb();
+      if (!takes.length) document.getElementById('takesView').classList.remove('open');
+    });
+    brow.appendChild(bw); brow.appendChild(bs); brow.appendChild(bd);
+    card.appendChild(v); card.appendChild(meta); card.appendChild(brow);
+    row.appendChild(card);
+  });
+}
 function showTake() {
   const type = (recorder && recorder.mimeType) || 'video/webm';
   const blob = new Blob(chunks, { type: type });
-  takeBlob = blob;
   const url = URL.createObjectURL(blob);
-  takeVideo.src = url;
-  dlBtn.href = url;
   const ext = type.indexOf('mp4') >= 0 ? 'mp4' : 'webm';
   const d = new Date(); const pad = n => String(n).padStart(2, '0');
-  takeName = 'rtj-take-' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.' + ext;
-  dlBtn.download = takeName;
-  document.getElementById('takeFmt').textContent = (ext === 'mp4')
-    ? 'Recorded as MP4 (H.264) — opens straight into Premiere.'
-    : 'Recorded as WebM — this browser could not record MP4. Selah can convert it for Premiere.';
-  takeSaved = false;
-  document.getElementById('thumbSaved').style.display = 'none';
-  document.getElementById('discardBtn').textContent = 'Discard & back';
-  document.getElementById('saveNote').textContent = 'Saves to your Downloads folder.';
-  const thumb = document.getElementById('takeThumb');
-  document.getElementById('thumbVideo').src = url;
-  document.getElementById('thumbDur').textContent = fmtTime(lastTakeMs);
-  thumb.style.display = 'block';
+  const t = { blob: blob, url: url, ext: ext, ms: lastTakeMs, saved: false,
+    name: 'rtj-take-' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()) + '.' + ext,
+    when: d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) };
+  takes.push(t);
+  currentTake = t;
+  refreshThumb();
 }
 dlBtn.addEventListener('click', () => {
-  if (!takeBlob) return;
-  takeSaved = true;
-  document.getElementById('thumbSaved').style.display = 'block';
+  if (!currentTake) return;
+  currentTake.saved = true;
   document.getElementById('saveNote').textContent = '✓ Saved to your Downloads folder.';
   document.getElementById('discardBtn').textContent = 'Done — back to prompt';
+  refreshThumb();
 });
 document.getElementById('discardBtn').addEventListener('click', () => {
   takeView.classList.remove('open');
   takeVideo.removeAttribute('src'); takeVideo.load();
-  takeBlob = null;
-  const thumb = document.getElementById('takeThumb');
-  thumb.style.display = 'none';
-  const tv = document.getElementById('thumbVideo'); tv.removeAttribute('src'); tv.load();
+  if (currentTake && !currentTake.saved) {
+    takes = takes.filter(x => x !== currentTake);
+    URL.revokeObjectURL(currentTake.url);
+  }
+  currentTake = null;
+  refreshThumb();
   cameraOff();
 });
+document.getElementById('takesBtn').addEventListener('click', () => { pause(); renderShelf(); document.getElementById('takesView').classList.add('open'); });
+document.getElementById('takesClose').addEventListener('click', () => document.getElementById('takesView').classList.remove('open'));
 
 render(); apply();
 </script>

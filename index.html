@@ -422,9 +422,15 @@ libPop.addEventListener('click', (e) => { if (e.target === libPop) libPop.classL
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') { libPop.classList.remove('open'); quickEdit.classList.remove('open'); takePop.classList.remove('open'); return; }
   if (libPop.classList.contains('open') || quickEdit.classList.contains('open')) return;
+  // Arrow keys belong to a slider while it has focus: the control's
+  // own step is 1 per press (holding repeats, so it runs faster).
+  // The global handler used to ALSO grab the keys and jump the speed
+  // by 10, which is the lurch Curtis felt on the sliders (Nov 10).
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
   if (e.code === 'Space') { e.preventDefault(); countdownThenPlay(); }
-  else if (e.key === 'ArrowUp') { speed = Math.min(300, speed + 10); speedIn.value = speed; document.getElementById('speedVal').textContent = speed; }
-  else if (e.key === 'ArrowDown') { speed = Math.max(10, speed - 10); speedIn.value = speed; document.getElementById('speedVal').textContent = speed; }
+  else if (e.key === 'ArrowUp') { speed = Math.min(300, speed + 1); speedIn.value = speed; document.getElementById('speedVal').textContent = speed; }
+  else if (e.key === 'ArrowDown') { speed = Math.max(10, speed - 1); speedIn.value = speed; document.getElementById('speedVal').textContent = speed; }
   else if (e.key === 'ArrowRight') { y += 60; clampY(); apply(); }
   else if (e.key === 'ArrowLeft') { y -= 60; clampY(); apply(); }
   else if (e.key === 'Home') { toTop(); }

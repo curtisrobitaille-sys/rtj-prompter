@@ -39,19 +39,16 @@
   #bar .spacer { flex: 1; }
 
   /* ---------- edit view ---------- */
-  #editView { position: fixed; inset: 0; z-index: 1200; background: #0a0a0b;
-    display: none; flex-direction: column; padding: 24px 20px 20px; }
-  #editView.open { display: flex; }
   #hdrTools, #lineTools { position: absolute; top: 10px; right: 14px; z-index: 5; display: flex; gap: 10px; align-items: stretch;
-    background: rgba(6, 24, 32, .55); border: 1px solid rgba(94, 234, 230, .35); border-radius: 14px; padding: 8px 10px;
+    background: rgba(6, 24, 32, .55); border: 1px solid rgba(94, 234, 230, .35); border-radius: 14px; padding: 7px 10px;
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-family: Arial, sans-serif; }
-  #hdrTools .htool, #lineTools .htool { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  #hdrTools .htool, #lineTools .htool { display: flex; flex-direction: column; align-items: center; gap: 3px; }
   #hdrTools .hval, #lineTools .hval { font-size: 12px; color: var(--gold); min-height: 14px; }
   #hdrTools .hlab, #lineTools .hlab { font-size: 10px; letter-spacing: .12em; color: #9fd8d4; text-transform: uppercase; }
-  #hdrTools input[type="range"], #lineTools input[type="range"] { writing-mode: vertical-lr; direction: rtl; width: 22px; height: 92px; accent-color: #28c9c7; cursor: pointer; }
+  #hdrTools input[type="range"], #lineTools input[type="range"] { writing-mode: vertical-lr; direction: rtl; width: 22px; height: 56px; accent-color: #28c9c7; cursor: pointer; }
   #lineTools { left: 14px; right: auto; }
-  #hdrEdit { min-width: 0; padding: 6px 12px 6px 7px; border-radius: 9999px; font-size: .78rem; gap: 8px; align-self: center; }
-  #hdrEdit .ic { width: 28px; height: 28px; font-size: 14px; }
+  #hdrEdit { min-width: 176px; height: 64px; padding: 8px 16px; border-radius: 14px; font-size: .82rem; gap: 10px; align-self: center; justify-content: center; }
+  #hdrEdit .ic { width: 32px; height: 32px; font-size: 15px; }
   #quickEdit { position: fixed; inset: 0; z-index: 1250; display: none; align-items: flex-start; justify-content: center;
     background: rgba(2, 8, 12, .55); }
   #quickEdit.open { display: flex; }
@@ -65,29 +62,19 @@
   .qe-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 14px; }
   .qe-row .rtj-btn { min-width: 0; padding: 8px 16px 8px 9px; font-size: .85rem; }
   .qe-row .rtj-btn .ic { width: 30px; height: 30px; font-size: 15px; }
-  #editView h2 { font-family: Arial, sans-serif; font-size: 18px; color: var(--gold); margin-bottom: 10px; }
-  #scriptBox { flex: 1; width: 100%; background: #141416; color: var(--ink);
-    border: 1px solid #333; border-radius: 10px; padding: 16px;
-    font-family: Georgia, serif; font-size: 20px; line-height: 1.5; resize: none; }
-  #editView .row { display: flex; gap: 8px; margin-top: 12px; font-family: Arial, sans-serif; }
-  #editView button { background: var(--gold); color: #000; font-weight: 700; border: 0;
-    border-radius: 8px; padding: 12px 20px; font-size: 16px; cursor: pointer; min-height: 48px; }
-  #editView button.ghost { background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; }
-
-  /* script library */
-  #libBlock { margin-top: 22px; border-top: 1px solid #2a2a2e; padding-top: 16px; font-family: Arial, sans-serif; overflow-y: auto; }
-  #libBlock h2 { font-size: 16px; color: var(--gold); margin-bottom: 10px; }
-  .libsave { display: flex; gap: 8px; flex-wrap: wrap; }
-  #libName { flex: 1; min-width: 220px; background: #141416; color: var(--ink); border: 1px solid #333;
-    border-radius: 8px; padding: 12px; font-size: 16px; }
-  #libList { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
-  #libList .librow { display: flex; align-items: center; gap: 8px; background: #141416; border: 1px solid #2a2a2e;
-    border-radius: 8px; padding: 10px 12px; }
-  #libList .nm { flex: 1; font-size: 16px; }
-  #libList button { background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; border-radius: 8px;
-    padding: 9px 14px; font-size: 14px; cursor: pointer; min-height: 40px; font-weight: 400; }
-  #libList button.load { background: var(--gold); color: #000; font-weight: 700; border: 0; }
-  .libempty { color: #888; font-size: 14px; }
+  /* saved-scripts pop-up (dock Edit) */
+  #libPop { position: fixed; inset: 0; z-index: 1250; display: none; align-items: flex-start; justify-content: center;
+    background: rgba(2, 8, 12, .55); }
+  #libPop.open { display: flex; }
+  .lib-sub { color: #9fd8d4; font-size: 13px; margin-bottom: 12px; font-family: Arial, sans-serif; }
+  #libPopList { display: flex; flex-direction: column; gap: 8px; max-height: 46vh; overflow-y: auto; }
+  #libPopList .librow { display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, .35);
+    border: 1px solid rgba(94, 234, 230, .3); border-radius: 10px; padding: 12px 14px; cursor: pointer; color: #fff; font-family: Arial, sans-serif; }
+  #libPopList .librow:hover { border-color: var(--gold); }
+  #libPopList .nm { flex: 1; font-size: 16px; }
+  #libPopList .cur { color: var(--gold); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  #libPopList .go { color: #000; background: var(--gold); font-weight: 700; border-radius: 8px; padding: 7px 12px; font-size: 13px; }
+  .libempty { color: #9fd8d4; font-size: 14px; font-family: Arial, sans-serif; }
 
   /* ---------- prompt stage ---------- */
   #stage { position: fixed; inset: 0; overflow: hidden; }
@@ -164,32 +151,29 @@
   body.camon:not(.recording) #campills { display: flex; }
   #campills .rtj-btn { min-width: 158px; justify-content: flex-start; padding: 7px 30px 7px 8px; border-radius: 9999px; font-size: .78rem; gap: 9px; }
   #campills .rtj-btn .ic { width: 30px; height: 30px; font-size: 14px; }
-  #takeThumb { position: fixed; right: 18px; top: 172px; width: 176px; z-index: 900; display: none; cursor: pointer; font-family: Arial, sans-serif; }
-  body.recording #takeThumb { display: none !important; }
-  #takeThumb video { width: 100%; display: block; border-radius: 12px; border: 2px solid rgba(94, 234, 230, .85); background: #000;
-    box-shadow: 0 0 14px rgba(40, 201, 199, .4), 0 8px 18px rgba(0, 0, 0, .5); }
-  #thumbDur { position: absolute; right: 8px; top: 8px; background: rgba(0, 0, 0, .65); color: #fff; font-size: 12px; padding: 2px 7px; border-radius: 999px; }
-  #thumbSaved { position: absolute; left: 8px; top: 8px; background: rgba(20, 90, 50, .85); color: #d8ffe9; font-size: 12px; padding: 2px 7px; border-radius: 999px; display: none; }
-  #takeThumb .tcap { margin-top: 6px; text-align: center; color: #c9f5ff; font-size: 13px; text-shadow: 0 1px 6px rgba(0,0,0,.8); }
+  #takeCluster { position: absolute; top: 10px; left: 90px; z-index: 5; display: none; flex-direction: column; gap: 5px; width: 106px; font-family: Arial, sans-serif; }
+  body.recording #takeCluster { display: none !important; }
+  #takeThumb { position: relative; width: 106px; cursor: pointer; }
+  #takeThumb video { width: 100%; display: block; border-radius: 10px; border: 2px solid rgba(94, 234, 230, .85); background: #000;
+    box-shadow: 0 0 12px rgba(40, 201, 199, .4), 0 6px 14px rgba(0, 0, 0, .5); }
+  #thumbDur { position: absolute; right: 6px; top: 6px; background: rgba(0, 0, 0, .65); color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 999px; }
+  #thumbSaved { position: absolute; left: 6px; top: 6px; background: rgba(20, 90, 50, .85); color: #d8ffe9; font-size: 10px; padding: 1px 6px; border-radius: 999px; display: none; }
   #saveNote { font-family: Arial, sans-serif; font-size: 13px; color: #8fa8a0; margin-top: 8px; }
-  #takesWrap { position: fixed; left: 0; top: calc(50% - 14px); display: none; z-index: 1000; transition: opacity .3s ease; }
-  body.faded #takesWrap, body.recording #takesWrap { opacity: 0; pointer-events: none; }
-  #takesWrap .rtj-btn { min-width: 158px; justify-content: flex-start; padding: 7px 8px 7px 30px; border-radius: 9999px; font-size: .78rem; gap: 9px; }
-  #takesWrap .rtj-btn .ic { width: 30px; height: 30px; font-size: 14px; }
-  #takesView { position: fixed; inset: 0; z-index: 1200; background: rgba(4, 10, 14, .97); display: none; flex-direction: column; padding: 24px 20px; font-family: Arial, sans-serif; overflow-y: auto; }
-  #takesView.open { display: flex; }
-  #takesView h2 { color: var(--gold); font-size: 20px; margin-bottom: 4px; }
-  #takesView .sub { color: #8fa8a0; font-size: 13px; margin-bottom: 16px; }
-  #takesRow { display: flex; flex-direction: row; flex-wrap: wrap; gap: 16px; }
-  .tcard { width: 216px; background: rgba(10, 30, 38, .8); border: 1.5px solid rgba(94, 234, 230, .4); border-radius: 14px; padding: 10px; }
-  .tcard video { width: 100%; border-radius: 8px; background: #000; display: block; }
-  .tcard .tmeta { display: flex; justify-content: space-between; color: #c9f5ff; font-size: 13px; margin: 8px 2px; }
-  .tcard .tsaved { color: #7fe6ae; }
-  .tcard .trow { display: flex; gap: 6px; }
-  .tcard button { flex: 1; border-radius: 8px; padding: 9px 4px; font-size: 13px; min-height: 40px; cursor: pointer; background: #12303a; color: #d9fbff; border: 1px solid rgba(94, 234, 230, .5); }
-  .tcard button.tsave { background: var(--gold); color: #000; font-weight: 700; border-color: var(--gold); }
-  .tcard button.tdel { background: #1c1c1f; color: #ffb3c0; border-color: #3a3a3e; }
-  #takesClose { margin-top: 20px; align-self: flex-start; border-radius: 8px; padding: 12px 22px; font-size: 15px; min-height: 48px; cursor: pointer; background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; }
+  #takesWrap { position: relative; }
+  #takesWrap .rtj-btn { width: 100%; min-width: 0; justify-content: center; padding: 4px 8px; border-radius: 999px; font-size: .64rem; gap: 7px; }
+  #takesWrap .rtj-btn .lbl { white-space: nowrap; }
+  #takesWrap .rtj-btn .ic { width: 22px; height: 22px; font-size: 12px; }
+  #takePop { position: absolute; top: calc(100% + 8px); left: 0; width: 200px; display: none; flex-direction: column; gap: 6px; padding: 10px;
+    background: linear-gradient(160deg, rgba(16, 58, 66, .96), rgba(6, 24, 32, .97));
+    border: 1.5px solid rgba(94, 234, 230, .45); border-radius: 14px; box-shadow: 0 14px 34px rgba(0, 0, 0, .6); }
+  #takePop.open { display: flex; }
+  #takePop .tp-title { color: var(--gold); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
+  #takePop .tprow { display: flex; align-items: center; gap: 8px; background: rgba(0, 0, 0, .35);
+    border: 1px solid rgba(94, 234, 230, .3); border-radius: 9px; padding: 8px 10px; cursor: pointer; color: #d9fbff; font-size: 13px; }
+  #takePop .tprow:hover { border-color: var(--gold); }
+  #takePop .tprow .nm { flex: 1; }
+  #takePop .tprow .sv { color: #7fe6ae; font-size: 11px; }
+  #takePop .tprow .del { background: none; border: 0; color: #ffb3c0; font-size: 14px; cursor: pointer; padding: 2px 4px; font-family: Arial, sans-serif; }
   @keyframes blink { 50% { opacity: .15; } }
   #camMsg { position: fixed; left: 0; right: 0; bottom: 96px; z-index: 46; text-align: center;
     color: #ffb3c0; font-family: Arial, sans-serif; font-size: 15px; display: none; padding: 0 16px; }
@@ -211,8 +195,18 @@
 <div id="lineTools">
   <div class="htool"><span class="hval" id="lineVal">55</span><input type="range" id="linepos" min="15" max="85" value="55"><span class="hlab">Line</span></div>
 </div>
+<div id="takeCluster">
+  <div id="takeThumb" title="Tap to watch your take">
+    <video id="thumbVideo" muted playsinline></video>
+    <span id="thumbDur">0:00</span><span id="thumbSaved">✓ Saved</span>
+  </div>
+  <div id="takesWrap">
+    <button class="rtj-btn" id="takesBtn"><span class="ic">🎞</span><span class="lbl">Takes · 0</span></button>
+    <div id="takePop"></div>
+  </div>
+</div>
 <div id="hdrTools">
-  <button id="hdrEdit" class="rtj-btn"><span class="ic">✎</span><span class="lbl">Edit</span></button>
+  <button id="hdrEdit" class="rtj-btn"><span class="ic">✎</span><span class="lbl">Edit current prompt</span></button>
 <div class="htool"><span class="hval" id="speedVal">90</span><input type="range" id="speed" min="10" max="300" value="90"><span class="hlab">Speed</span></div>
   <div class="htool"><span class="hval" id="fsizeVal">64</span><input type="range" id="fsize" min="32" max="120" value="64"><span class="hlab">Text</span></div>
   </div>
@@ -240,14 +234,6 @@
   <button class="rtj-btn" id="camOffBtn"><span class="ic">✕</span><span class="lbl">Cam off</span></button>
   <label id="zoomWrap" style="display:none; align-items:center; gap:6px; color:#c9f5ff; font-family:Arial,sans-serif; font-size:.8rem;">Zoom <input type="range" id="zoomIn" step="0.1"></label>
 </div>
-<div id="takesWrap">
-  <button class="rtj-btn" id="takesBtn"><span class="ic">🎞</span><span class="lbl">Takes · 0</span></button>
-</div>
-<div id="takeThumb" title="Tap to watch your take">
-  <video id="thumbVideo" muted playsinline></video>
-  <span id="thumbDur">0:00</span><span id="thumbSaved">✓ Saved</span>
-  <div class="tcap">Your take — tap to watch</div>
-</div>
 <div id="camMsg"></div>
 <div id="takeView">
   <h2>Your take</h2>
@@ -259,18 +245,12 @@
   <p id="takeFmt" style="font-family:Arial,sans-serif; font-size:14px; color:#bbb; margin-top:10px;"></p>
   <p id="saveNote"></p>
 </div>
-<div id="takesView">
-  <h2>Your takes</h2>
-  <p class="sub">This session's takes, newest first. Save the keepers — saved videos live in your Downloads folder for good.</p>
-  <div id="takesRow"></div>
-  <button id="takesClose">Back to prompt</button>
-</div>
 <div id="count"></div>
 <div id="hint">Space = play / pause &nbsp;·&nbsp; ↑ ↓ = speed &nbsp;·&nbsp; ← → = nudge &nbsp;·&nbsp; controls live on the screen edges</div>
 
 <div id="quickEdit">
   <div class="qe-card">
-    <div class="qe-title">Edit script</div>
+    <div class="qe-title">Edit current prompt</div>
     <textarea id="qeBox" spellcheck="false"></textarea>
     <div class="qe-row">
       <button id="qeCancel" class="rtj-btn"><span class="ic">✕</span><span class="lbl">Cancel</span></button>
@@ -278,21 +258,14 @@
     </div>
   </div>
 </div>
-<div id="editView">
-  <h2>Your script</h2>
-
-  <textarea id="scriptBox"></textarea>
-  <div class="row">
-    <button id="saveScript">Save &amp; prompt</button>
-    <button id="cancelEdit" class="ghost">Cancel</button>
-  </div>
-  <div id="libBlock">
-    <h2>Saved scripts — tap Load to put one on the prompter</h2>
-    <div class="libsave">
-      <input id="libName" type="text" placeholder="Name this script — e.g. Curtis's dialogue">
-      <button id="libSaveBtn">Save script</button>
+<div id="libPop">
+  <div class="qe-card">
+    <div class="qe-title">Saved scripts</div>
+    <div class="lib-sub">Tap a script to put it on the prompter.</div>
+    <div id="libPopList"></div>
+    <div class="qe-row">
+      <button id="libClose" class="rtj-btn"><span class="ic">✕</span><span class="lbl">Close</span></button>
     </div>
-    <div id="libList"></div>
   </div>
 </div>
 
@@ -362,23 +335,12 @@ document.querySelectorAll('.floating-dock .rtj-btn').forEach(b => b.addEventList
   if (act === 'play') countdownThenPlay();
   else if (act === 'top') toTop();
   else if (act === 'mirror') { mirrored = !mirrored; textEl.classList.toggle('mirror', mirrored); document.querySelectorAll('[data-act="mirror"]').forEach(x => x.classList.toggle('on', mirrored)); }
-  else if (act === 'edit') { pause(); scriptBox.value = script; renderLib(); editView.classList.add('open'); }
+  else if (act === 'edit') { pause(); renderLibPop(); libPop.classList.add('open'); }
   else if (act === 'fs') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
   else if (act === 'rec') recButtonFlow();
 }));
 
-/* edit view */
-const editView = document.getElementById('editView');
-const scriptBox = document.getElementById('scriptBox');
-document.getElementById('cancelEdit').addEventListener('click', () => editView.classList.remove('open'));
-document.getElementById('saveScript').addEventListener('click', () => {
-  script = scriptBox.value; localStorage.setItem('prompterScript', script);
-  render(); toTop(); editView.classList.remove('open');
-});
-
 /* ---------- script library ---------- */
-const libList = document.getElementById('libList');
-const libName = document.getElementById('libName');
 function loadLib() { try { return JSON.parse(localStorage.getItem('prompterLibrary') || '{}'); } catch (e) { return {}; } }
 function storeLib(lib) { localStorage.setItem('prompterLibrary', JSON.stringify(lib)); }
 if (!localStorage.getItem('prompterLibrarySeeded')) {
@@ -389,40 +351,37 @@ if (!localStorage.getItem('prompterLibrarySeeded')) {
   storeLib(seedLib);
   localStorage.setItem('prompterLibrarySeeded', '1');
 }
-function renderLib() {
+const libPop = document.getElementById('libPop');
+const libPopList = document.getElementById('libPopList');
+function renderLibPop() {
   const lib = loadLib();
   const names = Object.keys(lib);
-  libList.innerHTML = '';
+  libPopList.innerHTML = '';
   if (!names.length) {
     const d = document.createElement('div'); d.className = 'libempty';
-    d.textContent = 'No saved scripts yet. Write one above, give it a name, and save it.';
-    libList.appendChild(d); return;
+    d.textContent = 'No saved scripts yet.';
+    libPopList.appendChild(d); return;
   }
   names.forEach(nm => {
     const row = document.createElement('div'); row.className = 'librow';
     const label = document.createElement('span'); label.className = 'nm'; label.textContent = nm;
-    const load = document.createElement('button'); load.className = 'load'; load.textContent = 'Load';
-    load.addEventListener('click', () => {
-      script = loadLib()[nm]; localStorage.setItem('prompterScript', script);
-      render(); toTop(); editView.classList.remove('open');
+    row.appendChild(label);
+    if (lib[nm] === script) { const c = document.createElement('span'); c.className = 'cur'; c.textContent = 'On the prompter'; row.appendChild(c); }
+    const go = document.createElement('span'); go.className = 'go'; go.textContent = 'Load'; row.appendChild(go);
+    row.addEventListener('click', () => {
+      script = lib[nm]; localStorage.setItem('prompterScript', script);
+      render(); toTop(); libPop.classList.remove('open');
     });
-    const del = document.createElement('button'); del.textContent = 'Delete';
-    del.addEventListener('click', () => { const l = loadLib(); delete l[nm]; storeLib(l); renderLib(); });
-    row.appendChild(label); row.appendChild(load); row.appendChild(del);
-    libList.appendChild(row);
+    libPopList.appendChild(row);
   });
 }
-document.getElementById('libSaveBtn').addEventListener('click', () => {
-  const lib = loadLib();
-  let nm = libName.value.trim();
-  if (!nm) nm = 'Script ' + new Date().toLocaleString();
-  lib[nm] = scriptBox.value;
-  storeLib(lib); libName.value = ''; renderLib();
-});
+document.getElementById('libClose').addEventListener('click', () => libPop.classList.remove('open'));
+libPop.addEventListener('click', (e) => { if (e.target === libPop) libPop.classList.remove('open'); });
 
 /* keyboard */
 document.addEventListener('keydown', (e) => {
-  if (editView.classList.contains('open') || quickEdit.classList.contains('open')) return;
+  if (e.key === 'Escape') { libPop.classList.remove('open'); quickEdit.classList.remove('open'); takePop.classList.remove('open'); return; }
+  if (libPop.classList.contains('open') || quickEdit.classList.contains('open')) return;
   if (e.code === 'Space') { e.preventDefault(); countdownThenPlay(); }
   else if (e.key === 'ArrowUp') { speed = Math.min(300, speed + 10); speedIn.value = speed; document.getElementById('speedVal').textContent = speed; }
   else if (e.key === 'ArrowDown') { speed = Math.max(10, speed - 10); speedIn.value = speed; document.getElementById('speedVal').textContent = speed; }
@@ -544,7 +503,7 @@ document.getElementById('flipBtn').addEventListener('click', async () => {
   if (camState !== 'off') await startCam();
 });
 document.getElementById('camOffBtn').addEventListener('click', cameraOff);
-document.getElementById('takeThumb').addEventListener('click', () => { if (takes.length) openTake(takes[takes.length - 1]); });
+document.getElementById('takeThumb').addEventListener('click', () => { takePop.classList.remove('open'); if (takes.length) openTake(takes[takes.length - 1]); });
 
 function pickMime() {
   const opts = ['video/mp4', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1.640028,mp4a.40.2',
@@ -580,16 +539,40 @@ function stopRecording() {
 }
 
 
+const takePop = document.getElementById('takePop');
 function refreshThumb() {
   const latest = takes[takes.length - 1];
-  document.getElementById('takesWrap').style.display = takes.length ? 'block' : 'none';
   document.querySelector('#takesBtn .lbl').textContent = 'Takes · ' + takes.length;
-  const thumb = document.getElementById('takeThumb');
-  if (!latest) { thumb.style.display = 'none'; return; }
+  document.getElementById('takeCluster').style.display = takes.length ? 'flex' : 'none';
+  if (!latest) { takePop.classList.remove('open'); return; }
   document.getElementById('thumbVideo').src = latest.url;
   document.getElementById('thumbDur').textContent = fmtTime(latest.ms);
   document.getElementById('thumbSaved').style.display = latest.saved ? 'block' : 'none';
-  thumb.style.display = 'block';
+}
+function renderTakePop() {
+  takePop.innerHTML = '';
+  const title = document.createElement('div'); title.className = 'tp-title';
+  title.textContent = 'Your takes — tap one to watch';
+  takePop.appendChild(title);
+  takes.forEach((t, i) => {
+    const row = document.createElement('div'); row.className = 'tprow';
+    const nm = document.createElement('span'); nm.className = 'nm';
+    nm.textContent = 'Take ' + (i + 1) + ' · ' + fmtTime(t.ms);
+    row.appendChild(nm);
+    if (t.saved) { const sv = document.createElement('span'); sv.className = 'sv'; sv.textContent = '✓ Saved'; row.appendChild(sv); }
+    const del = document.createElement('button'); del.className = 'del'; del.textContent = '✕'; del.title = 'Delete this take';
+    del.addEventListener('click', (e) => {
+      e.stopPropagation();
+      takes = takes.filter(x => x !== t);
+      URL.revokeObjectURL(t.url);
+      if (currentTake === t) currentTake = null;
+      refreshThumb(); renderTakePop();
+      if (!takes.length) takePop.classList.remove('open');
+    });
+    row.appendChild(del);
+    row.addEventListener('click', () => { takePop.classList.remove('open'); openTake(t); });
+    takePop.appendChild(row);
+  });
 }
 function openTake(t) {
   currentTake = t;
@@ -602,35 +585,6 @@ function openTake(t) {
   document.getElementById('saveNote').textContent = t.saved ? '✓ Saved to your Downloads folder.' : 'Saves to your Downloads folder.';
   document.getElementById('discardBtn').textContent = t.saved ? 'Done — back to prompt' : 'Discard & back';
   takeView.classList.add('open');
-}
-function renderShelf() {
-  const row = document.getElementById('takesRow');
-  row.innerHTML = '';
-  [...takes].reverse().forEach(t => {
-    const card = document.createElement('div'); card.className = 'tcard';
-    const v = document.createElement('video'); v.src = t.url; v.muted = true; v.playsInline = true; v.preload = 'metadata';
-    const meta = document.createElement('div'); meta.className = 'tmeta';
-    meta.innerHTML = '<span>' + fmtTime(t.ms) + ' · ' + t.when + '</span>' + (t.saved ? '<span class="tsaved">✓ Saved</span>' : '');
-    const brow = document.createElement('div'); brow.className = 'trow';
-    const bw = document.createElement('button'); bw.textContent = '▶ Watch';
-    bw.addEventListener('click', () => { document.getElementById('takesView').classList.remove('open'); openTake(t); });
-    const bs = document.createElement('button'); bs.textContent = '⬇ Save'; bs.className = 'tsave';
-    bs.addEventListener('click', () => {
-      const a = document.createElement('a'); a.href = t.url; a.download = t.name; a.click();
-      t.saved = true; renderShelf(); refreshThumb();
-    });
-    const bd = document.createElement('button'); bd.textContent = 'Delete'; bd.className = 'tdel';
-    bd.addEventListener('click', () => {
-      takes = takes.filter(x => x !== t);
-      URL.revokeObjectURL(t.url);
-      if (currentTake === t) currentTake = null;
-      renderShelf(); refreshThumb();
-      if (!takes.length) document.getElementById('takesView').classList.remove('open');
-    });
-    brow.appendChild(bw); brow.appendChild(bs); brow.appendChild(bd);
-    card.appendChild(v); card.appendChild(meta); card.appendChild(brow);
-    row.appendChild(card);
-  });
 }
 function showTake() {
   const type = (recorder && recorder.mimeType) || 'video/webm';
@@ -671,8 +625,7 @@ document.getElementById('qeSave').addEventListener('click', () => {
   script = qeBox.value; localStorage.setItem('prompterScript', script);
   render(); toTop(); quickEdit.classList.remove('open');
 });
-document.getElementById('takesBtn').addEventListener('click', () => { pause(); renderShelf(); document.getElementById('takesView').classList.add('open'); });
-document.getElementById('takesClose').addEventListener('click', () => document.getElementById('takesView').classList.remove('open'));
+document.getElementById('takesBtn').addEventListener('click', () => { pause(); renderTakePop(); takePop.classList.toggle('open'); });
 
 render(); apply();
 </script>

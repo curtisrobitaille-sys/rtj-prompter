@@ -330,13 +330,53 @@ function countdownThenPlay() {
 }
 function toTop() { pause(); y = 0; apply(); }
 
+function fsHint(msg) {
+  let h = document.getElementById('fsHint');
+  if (!h) {
+    h = document.createElement('div');
+    h.id = 'fsHint';
+    h.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:9999;background:rgba(10,10,10,.92);color:#f5c542;border:1px solid #f5c542;border-radius:10px;padding:10px 16px;font:600 15px/1.35 system-ui,sans-serif;max-width:82vw;text-align:center;pointer-events:none;opacity:0;transition:opacity .25s;';
+    document.body.appendChild(h);
+  }
+  h.textContent = msg;
+  h.style.opacity = '1';
+  clearTimeout(h._t);
+  h._t = setTimeout(() => { h.style.opacity = '0'; }, 4200);
+}
+function inNativeFullScreen() {
+  // The window fills the whole screen but the page is NOT in API
+  // fullscreen: the Mac itself (Fn-F / green button) owns this layer,
+  // and only the Mac can take it off. Stacking the API layer on top
+  // left Curtis stuck behind an "press ESC" notice that ESC could
+  // not clear (Nov 10, 2026) — so the button explains instead.
+  return !document.fullscreenElement && !document.webkitFullscreenElement &&
+    window.innerHeight >= screen.height && window.outerHeight >= screen.height;
+}
+function toggleFullscreen() {
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    return;
+  }
+  if (inNativeFullScreen()) {
+    fsHint("This window is in the Mac's own full screen (Fn-F). Press Fn-F again to leave it — the prompter button can't undo the Mac's layer.");
+    return;
+  }
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!req) { fsHint('Full screen is not available in this browser — Fn-F works too.'); return; }
+  try {
+    const p = req.call(el);
+    if (p && p.catch) p.catch(() => fsHint('The browser blocked full screen — Fn-F on the keyboard works too.'));
+  } catch (e) { fsHint('The browser blocked full screen — Fn-F on the keyboard works too.'); }
+}
+
 document.querySelectorAll('.floating-dock .rtj-btn').forEach(b => b.addEventListener('click', () => {
   const act = b.dataset.act;
   if (act === 'play') countdownThenPlay();
   else if (act === 'top') toTop();
   else if (act === 'mirror') { mirrored = !mirrored; textEl.classList.toggle('mirror', mirrored); document.querySelectorAll('[data-act="mirror"]').forEach(x => x.classList.toggle('on', mirrored)); }
   else if (act === 'edit') { pause(); renderLibPop(); libPop.classList.add('open'); }
-  else if (act === 'fs') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
+  else if (act === 'fs') { toggleFullscreen(); }
   else if (act === 'rec') recButtonFlow();
 }));
 

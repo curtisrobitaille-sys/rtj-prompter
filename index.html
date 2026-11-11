@@ -795,49 +795,11 @@ function resyncAfterRotate() {
     /* a second pass once the rotation has fully settled: the first pass can catch the
        viewport mid-turn and leave the tap map a thumb's width off the painted controls */
     setTimeout(() => restoreOrientationPass(60), 650),
-    setTimeout(() => touchProbe(), 1500),
   ];
 }
 window.addEventListener('orientationchange', resyncAfterRotate);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', resyncAfterRotate);
 
-/* TEMPORARY touch probe (diagnostic build): after the camera starts and after each
-   rotation restore, the page checks its own tap map and the phone's viewport numbers
-   and shows them on screen, so a screenshot can show exactly what the phone reports. */
-const loadOrientation = currentOrientation();
-function probeStateLabel() {
-  const o = currentOrientation();
-  if (o === loadOrientation && Object.keys(orientationSeen).length > 1) return 'BACK TO ' + o.toUpperCase();
-  if (o !== loadOrientation) return 'IN ' + o.toUpperCase();
-  return 'FIRST LOAD';
-}
-function probeNameOf(el) {
-  if (!el) return 'nothing';
-  if (el.closest('#zoomIn')) return 'SLIDER';
-  if (el.closest('#flipBtn')) return 'CAMERA-BTN';
-  if (el.closest('#camOffBtn')) return 'CAMOFF-BTN';
-  if (el.closest('#phoneBar')) return 'BOTTOM-BAR';
-  if (el.closest('#campills')) return 'STACK';
-  return el.id || el.tagName;
-}
-let probeHideTimer = null;
-function touchProbe() {
-  if (!document.body.classList.contains('camon')) return;
-  const zin = document.getElementById('zoomIn');
-  const flip = document.getElementById('flipBtn');
-  if (!zin) return;
-  const zr = zin.getBoundingClientRect();
-  if (!zr.width) return;
-  const fr = flip.getBoundingClientRect();
-  const zHit = probeNameOf(document.elementFromPoint(zr.left + zr.width / 2, zr.top + zr.height / 2));
-  const fHit = probeNameOf(document.elementFromPoint(fr.left + fr.width / 2, fr.top + fr.height / 2));
-  const vv = window.visualViewport;
-  const vvTxt = vv ? ('view ' + Math.round(vv.height) + ' · off ' + Math.round(vv.offsetTop) + (Math.abs(vv.scale - 1) > 0.01 ? ' · zoom ' + vv.scale.toFixed(2) : '')) : 'view n/a';
-  camMsg.innerHTML = 'TOUCH CHECK · ' + probeStateLabel() + '<br>screen ' + window.innerHeight + ' · ' + vvTxt + '<br>tap on slider → ' + zHit + ' · tap on camera btn → ' + fHit;
-  camMsg.style.display = 'block';
-  clearTimeout(probeHideTimer);
-  probeHideTimer = setTimeout(() => { camMsg.style.display = 'none'; }, 9000);
-}
 
 /* The touch sheet (Curtis's design): on the phone the camera controls take no touches
    themselves. The stack catches every touch, and the app tests the touch against each
@@ -918,7 +880,6 @@ async function recButtonFlow() {
   camState = 'preview';
   document.body.classList.add('camon');
   placeCamPills();
-  setTimeout(() => touchProbe(), 1500);
   document.querySelectorAll('[data-act="rec"]').forEach(b => b.classList.add('on'));
   setRecUI('Start take');
 }

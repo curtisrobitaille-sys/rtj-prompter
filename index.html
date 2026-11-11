@@ -629,19 +629,25 @@ function setupZoom() {
 const orientationSeen = {};
 function currentOrientation() { return window.matchMedia('(orientation: portrait)').matches ? 'portrait' : 'landscape'; }
 orientationSeen[currentOrientation()] = true; /* the first-load state */
-let resyncTimer = null;
+function restoreOrientationPass(hideMs) {
+  document.body.classList.add('resync');
+  void document.body.offsetHeight;
+  setTimeout(() => {
+    document.body.classList.remove('resync');
+    applyMark(); clampY(); apply(); /* the same layout pass as first load */
+    if (stream) setupZoom();
+    orientationSeen[currentOrientation()] = true;
+  }, hideMs);
+}
+let resyncTimers = [];
 function resyncAfterRotate() {
-  clearTimeout(resyncTimer);
-  resyncTimer = setTimeout(() => {
-    document.body.classList.add('resync');
-    void document.body.offsetHeight;
-    setTimeout(() => {
-      document.body.classList.remove('resync');
-      applyMark(); clampY(); apply(); /* the same layout pass as first load */
-      if (stream) setupZoom();
-      orientationSeen[currentOrientation()] = true;
-    }, 120);
-  }, 80);
+  resyncTimers.forEach(clearTimeout);
+  resyncTimers = [
+    setTimeout(() => restoreOrientationPass(120), 80),
+    /* a second pass once the rotation has fully settled: the first pass can catch the
+       viewport mid-turn and leave the tap map a thumb's width off the painted controls */
+    setTimeout(() => restoreOrientationPass(60), 650),
+  ];
 }
 window.addEventListener('orientationchange', resyncAfterRotate);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', resyncAfterRotate);

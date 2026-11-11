@@ -278,6 +278,57 @@
     #takeView { padding: calc(var(--sat) + 14px) 12px calc(var(--sab) + 12px); }
     #takeView .row { flex-wrap: wrap; }
   }
+
+  /* ---------- air layout: the phone design, sized for the laptop ---------- */
+  body.air #hdrTools, body.air #lineTools, body.air .floating-dock, body.air #hint { display: none !important; }
+  body.air #banner { padding: 10px 8px 0; }
+  body.air #banner .b1 { font-size: 34px; letter-spacing: .5px; }
+  body.air #banner .b2 { font-size: 16px; letter-spacing: 1.4px; }
+  body.air #banner .b3 { margin-top: 5px; padding: 2px 0 4px; font-size: 12px; letter-spacing: 1px; }
+  body.air #text { max-width: 84%; line-height: 1.38; }
+  body.air #marker .line { left: 30px; right: 30px; }
+  body.air.camon #stage::before { content: ''; position: absolute; left: 0; right: 0; top: 74px; height: 46vh; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.62) 18%, rgba(0,0,0,.62) 82%, rgba(0,0,0,.30)); }
+  body.air #phoneBar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; align-items: stretch;
+    position: fixed; left: 50%; transform: translateX(-50%); width: min(900px, 94vw); bottom: 16px; z-index: 1100;
+    transition: transform .3s ease, opacity .3s ease; }
+  body.air.faded #phoneBar { opacity: 0; transform: translateX(-50%) translateY(130%); pointer-events: none; }
+  body.air.recording #phoneBar { opacity: 1 !important; transform: translateX(-50%) !important; pointer-events: auto !important; }
+  body.air .phone-btn { min-height: 58px; border: 2px solid rgba(94, 234, 230, .85); border-radius: 999px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    color: #d9fbff; background: linear-gradient(180deg, rgba(38, 110, 118, .92), rgba(6, 30, 40, .94));
+    box-shadow: inset 0 2px 3px rgba(190, 255, 250, .5), 0 0 14px rgba(40, 201, 199, .38), 0 6px 14px rgba(0,0,0,.45);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  body.air .phone-btn .ic { font-size: 21px; line-height: 1; }
+  body.air .phone-btn .lbl { font-size: .82rem; white-space: nowrap; }
+  body.air .phone-btn .lbl[hidden] { display: inline; }
+  body.air .phone-btn.icon-only { width: auto; padding: 0 10px; }
+  body.air .phone-btn.record { border-color: rgba(245, 200, 110, .9); color: #ffe1a1; }
+  body.air .phone-btn.record .dot { width: 17px; height: 17px; border-radius: 50%; display: block; background: radial-gradient(circle at 38% 32%, #ffb1a1, #ff3b1f 55%, #c11100); box-shadow: 0 0 10px rgba(255,60,30,.8); }
+  body.air.recording .phone-btn.record .dot { animation: blink 1s steps(2) infinite; }
+  body.air .phone-btn.on { background: linear-gradient(180deg, rgba(122, 84, 16, .94), rgba(40, 26, 4, .96)); border-color: #f5c86e; color: #ffe1a1; }
+  body.air #campills { bottom: auto; top: 84px; right: 12px; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; column-gap: 14px; row-gap: 10px; width: min(560px, calc(100vw - 24px)); }
+  body.air #phonePanel { display: none; position: fixed; left: 50%; transform: translateX(-50%); width: min(580px, 94vw); bottom: 92px; z-index: 1150;
+    padding: 16px; border-radius: 20px; color: #eefafa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(160deg, #103a44, #04121a);
+    border: 1.5px solid rgba(94, 234, 230, .5); box-shadow: 0 18px 50px rgba(0,0,0,.65), 0 0 24px rgba(40,201,199,.16); }
+  body.air #phonePanel.open { display: block; }
+  body.air .pp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  body.air .pp-close { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(94,234,230,.5); background: rgba(0,0,0,.3); color: #fff; font-size: 22px; cursor: pointer; }
+  body.air .step-row { display: grid; grid-template-columns: 72px 48px 1fr 48px; align-items: center; gap: 12px; margin: 9px 0; }
+  body.air .step-row .name { color: #9fd8d4; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  body.air .step-row .value { text-align: center; color: #fff; font-size: 17px; font-weight: 800; }
+  body.air .step-btn { height: 46px; border-radius: 14px; border: 1.5px solid rgba(94,234,230,.65); background: rgba(0,0,0,.32); color: #d9fbff; font-size: 25px; font-weight: 800; cursor: pointer; }
+  body.air .voice-btn { width: 100%; min-height: 52px; margin-top: 12px; border-radius: 15px; border: 1.5px solid rgba(245,200,110,.7); background: rgba(64,42,6,.55); color: #ffe1a1; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; padding: 10px 13px; cursor: pointer; }
+  body.air .voice-btn .state { color: #fff; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+  body.air .voice-btn.on { background: linear-gradient(180deg, rgba(122,84,16,.95), rgba(40,26,4,.97)); box-shadow: 0 0 18px rgba(245,180,60,.35); }
+  body.air .pp-note { margin-top: 9px; color: #b9d9d6; font-size: 12.5px; line-height: 1.45; }
+  body.air .pp-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+  body.air .pp-actions button { min-height: 44px; border-radius: 13px; border: 1px solid rgba(94,234,230,.45); background: rgba(0,0,0,.3); color: #d9fbff; font-weight: 800; font-size: 13px; cursor: pointer; }
+  body.air #voiceStatus { display: none; position: fixed; top: 86px; right: 8px; z-index: 900; max-width: 56vw; pointer-events: none;
+    padding: 7px 10px; border-radius: 999px; background: rgba(20, 14, 0, .78); border: 1px solid rgba(245,200,110,.65); color: #ffe1a1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 700; }
+  body.air.voice-on #voiceStatus { display: block; pointer-events: auto; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -400,6 +451,21 @@ if (isPhoneLayout) {
   document.body.classList.add('phone');
   speedIn.value = localStorage.getItem('prompterPhoneSpeed') || 80;
   fsizeIn.value = localStorage.getItem('prompterPhoneText') || 40;
+}
+/* air layout: the phone design at laptop size, opt-in per browser via ?air=1
+   (remembered on that machine; ?air=0 turns it back off). The plain desktop
+   layout stays the default everywhere else. */
+const airParam = new URLSearchParams(location.search).get('air');
+if (airParam === '1') localStorage.setItem('prompterAir', '1');
+if (airParam === '0') localStorage.removeItem('prompterAir');
+const airMode = !isPhoneLayout && localStorage.getItem('prompterAir') === '1';
+const panelStoreKey = base => 'prompter' + (isPhoneLayout ? 'Phone' : airMode ? 'Air' : '') + base;
+if (airMode) {
+  document.body.classList.add('air');
+  speedIn.value = localStorage.getItem('prompterAirSpeed') || 90;
+  fsizeIn.value = localStorage.getItem('prompterAirText') || 64;
+  document.querySelector('#phonePanel .pp-head span').textContent = 'Prompter controls';
+  document.getElementById('phoneTune').setAttribute('aria-label', 'Prompter controls');
 }
 
 let script = localStorage.getItem('prompterScript') || DEFAULT_SCRIPT;
@@ -574,14 +640,14 @@ document.addEventListener('mousemove', (e) => {
 window.addEventListener('resize', () => { applyMark(); clampY(); apply(); placeCamPills(); });
 
 /* draggable reading line — drag the gold arrows up or down; the spot is remembered */
-let markFrac = parseFloat(localStorage.getItem(isPhoneLayout ? 'prompterPhoneMarkFrac' : 'prompterMarkFrac')) || (isPhoneLayout ? 0.28 : 0.55);
+let markFrac = parseFloat(localStorage.getItem(panelStoreKey('MarkFrac'))) || ((isPhoneLayout || airMode) ? 0.28 : 0.55);
 function applyMark() { document.documentElement.style.setProperty('--mark', (markFrac * window.innerHeight) + 'px'); }
 applyMark();
 const lineIn = document.getElementById('linepos');
 lineIn.value = Math.round(markFrac * 100);
 document.getElementById('lineVal').textContent = lineIn.value;
 lineIn.addEventListener('input', () => { markFrac = lineIn.value / 100; applyMark(); clampY(); apply(); document.getElementById('lineVal').textContent = lineIn.value; });
-lineIn.addEventListener('change', () => { localStorage.setItem(isPhoneLayout ? 'prompterPhoneMarkFrac' : 'prompterMarkFrac', markFrac); });
+lineIn.addEventListener('change', () => { localStorage.setItem(panelStoreKey('MarkFrac'), markFrac); });
 
 /* ---------- record mode ---------- */
 const cam = document.getElementById('cam');
@@ -988,19 +1054,19 @@ document.querySelectorAll('[data-step]').forEach(btn => btn.addEventListener('cl
     speed = Math.min(300, Math.max(10, speed + dir * 5));
     speedIn.value = speed;
     document.getElementById('speedVal').textContent = speed;
-    localStorage.setItem('prompterPhoneSpeed', speed);
+    localStorage.setItem(panelStoreKey('Speed'), speed);
   } else if (kind === 'text') {
-    const v = Math.min(84, Math.max(28, +fsizeIn.value + dir * 2));
+    const v = Math.min(isPhoneLayout ? 84 : 110, Math.max(28, +fsizeIn.value + dir * 2));
     fsizeIn.value = v;
     textEl.style.fontSize = v + 'px';
     document.getElementById('fsizeVal').textContent = v;
-    localStorage.setItem('prompterPhoneText', v);
+    localStorage.setItem(panelStoreKey('Text'), v);
     clampY(); apply();
   } else if (kind === 'line') {
     markFrac = Math.min(0.55, Math.max(0.16, markFrac + dir * 0.03));
     lineIn.value = Math.round(markFrac * 100);
     document.getElementById('lineVal').textContent = lineIn.value;
-    localStorage.setItem('prompterPhoneMarkFrac', markFrac.toFixed(3));
+    localStorage.setItem(panelStoreKey('MarkFrac'), markFrac.toFixed(3));
     applyMark(); clampY(); apply();
   }
   syncPhoneControls();

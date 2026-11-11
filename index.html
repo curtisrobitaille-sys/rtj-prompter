@@ -233,7 +233,7 @@
     .phone-btn.record .dot { width: 17px; height: 17px; border-radius: 50%; display: block; background: radial-gradient(circle at 38% 32%, #ffb1a1, #ff3b1f 55%, #c11100); box-shadow: 0 0 10px rgba(255,60,30,.8); }
     body.recording .phone-btn.record .dot { animation: blink 1s steps(2) infinite; }
     .phone-btn.on { background: linear-gradient(180deg, rgba(122, 84, 16, .94), rgba(40, 26, 4, .96)); border-color: #f5c86e; color: #ffe1a1; }
-    #campills { top: auto; right: 8px; bottom: calc(var(--sab) + 90px); flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; column-gap: 14px; row-gap: 28px; width: min(336px, calc(100vw - 16px)); transform: translateZ(0); }
+    #campills { bottom: auto; top: 0; right: 8px; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; column-gap: 14px; row-gap: 28px; width: min(336px, calc(100vw - 16px)); transform: translateZ(0); }
     #campills .rtj-btn { min-width: 0; padding: 10px 14px 10px 10px; font-size: .68rem; gap: 6px; }
     #campills .rtj-btn .ic { width: 30px; height: 30px; font-size: 13px; }
     #zoomWrap { position: static; order: -1; margin-left: auto; background: rgba(0,0,0,.55); padding: 11px 13px; border-radius: 999px; }
@@ -562,7 +562,7 @@ document.addEventListener('mousemove', (e) => {
   if (e.clientY > 240) hideTimer = setTimeout(() => { if (playing) { topwrap.classList.add('fade'); document.body.classList.add('faded'); } }, 2500);
 });
 
-window.addEventListener('resize', () => { applyMark(); clampY(); apply(); });
+window.addEventListener('resize', () => { applyMark(); clampY(); apply(); placeCamPills(); });
 
 /* draggable reading line — drag the gold arrows up or down; the spot is remembered */
 let markFrac = parseFloat(localStorage.getItem(isPhoneLayout ? 'prompterPhoneMarkFrac' : 'prompterMarkFrac')) || (isPhoneLayout ? 0.28 : 0.55);
@@ -605,6 +605,23 @@ async function startCam() {
   }
 }
 
+/* The camera stack is placed from the TOP on the phone, measured in JS: bottom-anchored
+   fixed elements can keep a tap map shifted up by a control height after an iPhone
+   rotation, while top-anchored placement stays registered with what is painted. The top
+   is computed so the stack's bottom edge lands exactly where the design puts it —
+   the safe-area inset plus 90px above the bottom of the screen. */
+const campillsEl = document.getElementById('campills');
+const sabProbe = document.createElement('div');
+sabProbe.style.cssText = 'position: fixed; left: 0; bottom: 0; width: 0; height: env(safe-area-inset-bottom); visibility: hidden; pointer-events: none;';
+document.body.appendChild(sabProbe);
+function placeCamPills() {
+  if (!isPhoneLayout || !document.body.classList.contains('camon')) return;
+  const h = campillsEl.offsetHeight;
+  if (!h) return;
+  const gap = sabProbe.offsetHeight + 90;
+  campillsEl.style.top = Math.max(0, window.innerHeight - gap - h) + 'px';
+}
+
 /* zoom-out control — only appears when the camera itself reports a zoom range */
 function setupZoom() {
   const wrap = document.getElementById('zoomWrap');
@@ -619,6 +636,7 @@ function setupZoom() {
       zin.oninput = () => { const t = stream && stream.getVideoTracks()[0]; if (t) t.applyConstraints({ advanced: [{ zoom: +zin.value }] }).catch(() => {}); };
     } else { wrap.style.display = 'none'; }
   } catch (e) { wrap.style.display = 'none'; }
+  placeCamPills();
 }
 
 /* Orientation state: each orientation keeps the state it had on first load. Rotating away
@@ -636,6 +654,7 @@ function restoreOrientationPass(hideMs) {
     document.body.classList.remove('resync');
     applyMark(); clampY(); apply(); /* the same layout pass as first load */
     if (stream) setupZoom();
+    placeCamPills();
     orientationSeen[currentOrientation()] = true;
   }, hideMs);
 }
@@ -665,6 +684,7 @@ async function recButtonFlow() {
   const ok = await startCam(); if (!ok) return;
   camState = 'preview';
   document.body.classList.add('camon');
+  placeCamPills();
   document.querySelectorAll('[data-act="rec"]').forEach(b => b.classList.add('on'));
   setRecUI('Start take');
 }

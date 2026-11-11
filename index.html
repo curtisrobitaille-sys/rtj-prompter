@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>RTJ Prompter</title>
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -187,6 +187,82 @@
     cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
   #dlBtn { background: var(--gold); color: #000; font-weight: 700; }
   #discardBtn { background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; }
+
+  /* ---------- phone layout (v1) ---------- */
+  #phoneBar, #phonePanel, #voiceStatus { display: none; }
+  .vword.heard { color: #f3d27a; }
+  .vword.current { text-decoration: underline; text-decoration-color: var(--gold); text-decoration-thickness: 3px; text-underline-offset: 7px; }
+  @media (max-width: 820px), (max-height: 500px) and (pointer: coarse) {
+    :root { --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); }
+    body { overscroll-behavior: none; }
+    button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #banner { padding: calc(var(--sat) + 6px) 8px 0; }
+    #banner .b1 { font-size: 29px; letter-spacing: .5px; }
+    #banner .b2 { font-size: 14px; letter-spacing: 1.1px; }
+    #banner .b3 { margin-top: 5px; padding: 2px 0 4px; font-size: 11px; letter-spacing: 1px; }
+    #hdrTools, #lineTools, .floating-dock, #hint { display: none !important; }
+    #takeCluster { top: calc(var(--sat) + 86px); left: 8px; width: 64px; }
+    #takeThumb { width: 64px; }
+    #takesWrap .rtj-btn { font-size: .56rem; padding: 3px 5px; gap: 4px; }
+    #takesWrap .rtj-btn .ic { width: 19px; height: 19px; font-size: 10px; }
+    #takePop { width: min(220px, 72vw); }
+    #text { max-width: 88%; line-height: 1.38; }
+    #marker::before { left: 0; }
+    #marker::after { right: 0; }
+    #marker .line { left: 30px; right: 30px; }
+    #cam { object-fit: cover; z-index: 0; }
+    #scroller { z-index: 2; }
+    body.camon #stage::before { content: ''; position: absolute; left: 0; right: 0; top: calc(var(--sat) + 72px); height: 45vh; height: 45dvh; z-index: 1; pointer-events: none;
+      background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.62) 18%, rgba(0,0,0,.62) 82%, rgba(0,0,0,.30)); }
+    #phoneBar { display: grid; grid-template-columns: 52px 52px minmax(104px, 1fr) 52px 52px; gap: 8px; align-items: stretch;
+      position: fixed; left: 8px; right: 8px; bottom: calc(var(--sab) + 8px); z-index: 1100;
+      transition: transform .3s ease, opacity .3s ease; }
+    body.faded #phoneBar { opacity: 0; transform: translateY(130%); pointer-events: none; }
+    body.recording #phoneBar { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
+    .phone-btn { min-height: 54px; border: 2px solid rgba(94, 234, 230, .85); border-radius: 999px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      color: #d9fbff; background: linear-gradient(180deg, rgba(38, 110, 118, .92), rgba(6, 30, 40, .94));
+      box-shadow: inset 0 2px 3px rgba(190, 255, 250, .5), 0 0 14px rgba(40, 201, 199, .38), 0 6px 14px rgba(0,0,0,.45);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .phone-btn .ic { font-size: 21px; line-height: 1; }
+    .phone-btn .lbl { font-size: .78rem; white-space: nowrap; }
+    .phone-btn.icon-only { width: 52px; padding: 0; }
+    .phone-btn.record { border-color: rgba(245, 200, 110, .9); color: #ffe1a1; }
+    .phone-btn.record .dot { width: 17px; height: 17px; border-radius: 50%; display: block; background: radial-gradient(circle at 38% 32%, #ffb1a1, #ff3b1f 55%, #c11100); box-shadow: 0 0 10px rgba(255,60,30,.8); }
+    body.recording .phone-btn.record .dot { animation: blink 1s steps(2) infinite; }
+    .phone-btn.on { background: linear-gradient(180deg, rgba(122, 84, 16, .94), rgba(40, 26, 4, .96)); border-color: #f5c86e; color: #ffe1a1; }
+    #campills { top: auto; right: 8px; bottom: calc(var(--sab) + 76px); flex-direction: row; gap: 8px; }
+    #campills .rtj-btn { min-width: 0; padding: 7px 12px 7px 8px; font-size: .68rem; gap: 6px; }
+    #campills .rtj-btn .ic { width: 27px; height: 27px; font-size: 13px; }
+    #zoomWrap { position: absolute; right: 0; bottom: 52px; background: rgba(0,0,0,.55); padding: 6px 9px; border-radius: 999px; }
+    #phonePanel { display: none; position: fixed; left: 8px; right: 8px; bottom: calc(var(--sab) + 72px); z-index: 1150;
+      padding: 14px; border-radius: 20px; color: #eefafa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(160deg, #103a44, #04121a);
+      border: 1.5px solid rgba(94, 234, 230, .5); box-shadow: 0 18px 50px rgba(0,0,0,.65), 0 0 24px rgba(40,201,199,.16); }
+    #phonePanel.open { display: block; }
+    .pp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .pp-close { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(94,234,230,.5); background: rgba(0,0,0,.3); color: #fff; font-size: 22px; }
+    .step-row { display: grid; grid-template-columns: 72px 48px 1fr 48px; align-items: center; gap: 8px; margin: 9px 0; }
+    .step-row .name { color: #9fd8d4; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .step-row .value { text-align: center; color: #fff; font-size: 17px; font-weight: 800; }
+    .step-btn { height: 46px; border-radius: 14px; border: 1.5px solid rgba(94,234,230,.65); background: rgba(0,0,0,.32); color: #d9fbff; font-size: 25px; font-weight: 800; }
+    .voice-btn { width: 100%; min-height: 52px; margin-top: 12px; border-radius: 15px; border: 1.5px solid rgba(245,200,110,.7); background: rgba(64,42,6,.55); color: #ffe1a1; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; padding: 10px 13px; }
+    .voice-btn .state { color: #fff; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .voice-btn.on { background: linear-gradient(180deg, rgba(122,84,16,.95), rgba(40,26,4,.97)); box-shadow: 0 0 18px rgba(245,180,60,.35); }
+    .pp-note { margin-top: 9px; color: #b9d9d6; font-size: 12.5px; line-height: 1.45; }
+    .pp-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .pp-actions button { min-height: 44px; border-radius: 13px; border: 1px solid rgba(94,234,230,.45); background: rgba(0,0,0,.3); color: #d9fbff; font-weight: 800; font-size: 13px; }
+    #voiceStatus { display: none; position: fixed; top: calc(var(--sat) + 86px); right: 8px; z-index: 900; max-width: 56vw; pointer-events: none;
+      padding: 7px 10px; border-radius: 999px; background: rgba(20, 14, 0, .78); border: 1px solid rgba(245,200,110,.65); color: #ffe1a1;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 700; }
+    body.voice-on #voiceStatus { display: block; pointer-events: auto; cursor: pointer; }
+    #count { font-size: 118px; }
+    .qe-card { margin-top: calc(var(--sat) + 50px); width: 94vw; max-height: calc(100vh - 104px); max-height: calc(100dvh - 104px); overflow-y: auto; padding: 14px; }
+    #qeBox { height: 30vh; height: 30dvh; }
+    #camMsg { bottom: calc(var(--sab) + 132px); font-size: 14px; }
+    #takeView { padding: calc(var(--sat) + 14px) 12px calc(var(--sab) + 12px); }
+    #takeView .row { flex-wrap: wrap; }
+  }
 </style>
 </head>
 <body>
@@ -212,7 +288,6 @@
   </div>
 <div id="banner"><div class="b1">RTJ PROMPTER</div><div class="b2">RADIO &#8226; TELEVISION &#8226; JOURNALISM</div><div class="b3">NSCC IVANY CAMPUS &#8226; DARTMOUTH</div></div>
 </div>
-</div>
 
 <div id="stage">
   <video id="cam" autoplay playsinline muted></video>
@@ -235,6 +310,27 @@
   <label id="zoomWrap" style="display:none; align-items:center; gap:6px; color:#c9f5ff; font-family:Arial,sans-serif; font-size:.8rem;">Zoom <input type="range" id="zoomIn" step="0.1"></label>
 </div>
 <div id="camMsg"></div>
+<div id="voiceStatus" aria-live="polite"></div>
+<nav id="phoneBar" aria-label="Phone prompter controls">
+  <button class="phone-btn icon-only" data-act="play" aria-label="Play or pause"><span class="ic">▶</span><span class="lbl" hidden>Play</span></button>
+  <button class="phone-btn icon-only" data-act="top" aria-label="Back to top"><span class="ic">↑</span></button>
+  <button class="phone-btn record" data-act="rec"><span class="dot"></span><span class="lbl">Record</span></button>
+  <button class="phone-btn icon-only" data-act="edit" aria-label="Saved scripts"><span class="ic">☰</span></button>
+  <button class="phone-btn icon-only" id="phoneTune" aria-label="Phone controls"><span class="ic">⚙</span></button>
+</nav>
+<section id="phonePanel" aria-label="Phone controls">
+  <div class="pp-head"><span>Phone controls</span><button class="pp-close" id="phoneClose" aria-label="Close">×</button></div>
+  <div class="step-row"><span class="name">Speed</span><button class="step-btn" data-step="speed:-1" aria-label="Slower">−</button><span class="value" id="phoneSpeedVal">80</span><button class="step-btn" data-step="speed:1" aria-label="Faster">+</button></div>
+  <div class="step-row"><span class="name">Text</span><button class="step-btn" data-step="text:-1" aria-label="Smaller text">−</button><span class="value" id="phoneTextVal">40</span><button class="step-btn" data-step="text:1" aria-label="Larger text">+</button></div>
+  <div class="step-row"><span class="name">Line</span><button class="step-btn" data-step="line:-1" aria-label="Move reading line up">−</button><span class="value" id="phoneLineVal">28</span><button class="step-btn" data-step="line:1" aria-label="Move reading line down">+</button></div>
+  <button class="voice-btn" id="voiceBtn"><span>🎙 Voice follow</span><span class="state" id="voiceState">Off</span></button>
+  <p class="pp-note">Experimental: when your browser supports it, the words move as you speak. If word-tracking is unavailable, it uses the simpler sound mode — it moves while it hears your voice and holds when you pause.</p>
+  <div class="pp-actions">
+    <button id="phoneEditCurrent">Edit text</button>
+    <button id="phoneMirror">Mirror</button>
+    <button id="phoneTop">Top</button>
+  </div>
+</section>
 <div id="takeView">
   <h2>Your take</h2>
   <video id="takeVideo" controls playsinline></video>
@@ -282,6 +378,13 @@ const topwrap = document.getElementById('topwrap');
 const countEl = document.getElementById('count');
 const speedIn = document.getElementById('speed');
 const fsizeIn = document.getElementById('fsize');
+const phoneMQ = window.matchMedia('(max-width: 820px), (max-height: 500px) and (pointer: coarse)');
+const isPhoneLayout = phoneMQ.matches;
+if (isPhoneLayout) {
+  document.body.classList.add('phone');
+  speedIn.value = localStorage.getItem('prompterPhoneSpeed') || 80;
+  fsizeIn.value = localStorage.getItem('prompterPhoneText') || 40;
+}
 
 let script = localStorage.getItem('prompterScript') || DEFAULT_SCRIPT;
 let y = 0, playing = false, speed = +speedIn.value, lastT = null, raf = null;
@@ -320,6 +423,7 @@ function pause() {
   document.body.classList.remove('faded');
 }
 function countdownThenPlay() {
+  if (typeof voiceActive !== 'undefined' && voiceActive) { stopVoiceFollow(); return; }
   if (playing) { pause(); return; }
   let n = 3; countEl.style.display = 'flex'; countEl.textContent = n;
   const iv = setInterval(() => {
@@ -370,7 +474,7 @@ function toggleFullscreen() {
   } catch (e) { fsHint('The browser blocked full screen — Fn-F on the keyboard works too.'); }
 }
 
-document.querySelectorAll('.floating-dock .rtj-btn').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('.floating-dock .rtj-btn, #phoneBar [data-act]').forEach(b => b.addEventListener('click', () => {
   const act = b.dataset.act;
   if (act === 'play') countdownThenPlay();
   else if (act === 'top') toTop();
@@ -409,6 +513,7 @@ function renderLibPop() {
     if (lib[nm] === script) { const c = document.createElement('span'); c.className = 'cur'; c.textContent = 'On the prompter'; row.appendChild(c); }
     const go = document.createElement('span'); go.className = 'go'; go.textContent = 'Load'; row.appendChild(go);
     row.addEventListener('click', () => {
+      if (voiceActive) stopVoiceFollow();
       script = lib[nm]; localStorage.setItem('prompterScript', script);
       render(); toTop(); libPop.classList.remove('open');
     });
@@ -453,14 +558,14 @@ document.addEventListener('mousemove', (e) => {
 window.addEventListener('resize', () => { applyMark(); clampY(); apply(); });
 
 /* draggable reading line — drag the gold arrows up or down; the spot is remembered */
-let markFrac = parseFloat(localStorage.getItem('prompterMarkFrac')) || 0.55;
+let markFrac = parseFloat(localStorage.getItem(isPhoneLayout ? 'prompterPhoneMarkFrac' : 'prompterMarkFrac')) || (isPhoneLayout ? 0.28 : 0.55);
 function applyMark() { document.documentElement.style.setProperty('--mark', (markFrac * window.innerHeight) + 'px'); }
 applyMark();
 const lineIn = document.getElementById('linepos');
 lineIn.value = Math.round(markFrac * 100);
 document.getElementById('lineVal').textContent = lineIn.value;
 lineIn.addEventListener('input', () => { markFrac = lineIn.value / 100; applyMark(); clampY(); apply(); document.getElementById('lineVal').textContent = lineIn.value; });
-lineIn.addEventListener('change', () => { localStorage.setItem('prompterMarkFrac', markFrac); });
+lineIn.addEventListener('change', () => { localStorage.setItem(isPhoneLayout ? 'prompterPhoneMarkFrac' : 'prompterMarkFrac', markFrac); });
 
 /* ---------- record mode ---------- */
 const cam = document.getElementById('cam');
@@ -482,6 +587,9 @@ async function startCam() {
     cam.classList.toggle('front', facing === 'user');
     camMsg.style.display = 'none';
     setupZoom();
+    if (voiceActive && voiceMode === 'sound' && attachSoundAnalyser(stream) && voiceStream) {
+      voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null;
+    }
     return true;
   } catch (e) {
     camMsg.textContent = 'The camera could not be opened here. Prompt mode still works — some browsers block camera recording.';
@@ -527,6 +635,7 @@ function cameraOff() {
   if (camState === 'countdown') { clearInterval(countdownIv); countEl.style.display = 'none'; }
   camState = 'off';
   document.body.classList.remove('camon');
+  if (voiceActive && voiceMode === 'sound') stopVoiceFollow();
   if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
   cam.srcObject = null;
   document.querySelectorAll('[data-act="rec"]').forEach(b => b.classList.remove('on'));
@@ -571,7 +680,9 @@ function beginTake() {
   recStart = Date.now();
   setRecUI('0:00');
   recTimer = setInterval(() => { setRecUI(fmtTime(Date.now() - recStart)); }, 250);
-  toTop(); play();
+  toTop();
+  if (voiceActive) { resetVoiceFollowPosition(); }
+  else { play(); }
 }
 
 function stopRecording() {
@@ -668,10 +779,262 @@ const qeBox = document.getElementById('qeBox');
 document.getElementById('hdrEdit').addEventListener('click', () => { pause(); qeBox.value = script; quickEdit.classList.add('open'); qeBox.focus(); });
 document.getElementById('qeCancel').addEventListener('click', () => quickEdit.classList.remove('open'));
 document.getElementById('qeSave').addEventListener('click', () => {
+  if (voiceActive) stopVoiceFollow();
   script = qeBox.value; localStorage.setItem('prompterScript', script);
   render(); toTop(); quickEdit.classList.remove('open');
 });
 document.getElementById('takesBtn').addEventListener('click', () => { pause(); renderTakePop(); takePop.classList.toggle('open'); });
+
+/* ---------- phone controls ---------- */
+const phonePanel = document.getElementById('phonePanel');
+const phoneSpeedVal = document.getElementById('phoneSpeedVal');
+const phoneTextVal = document.getElementById('phoneTextVal');
+const phoneLineVal = document.getElementById('phoneLineVal');
+function syncPhoneControls() {
+  phoneSpeedVal.textContent = speed;
+  phoneTextVal.textContent = fsizeIn.value;
+  phoneLineVal.textContent = Math.round(markFrac * 100);
+}
+document.querySelectorAll('[data-step]').forEach(btn => btn.addEventListener('click', () => {
+  const parts = btn.dataset.step.split(':');
+  const kind = parts[0], dir = +parts[1];
+  if (kind === 'speed') {
+    speed = Math.min(300, Math.max(10, speed + dir * 5));
+    speedIn.value = speed;
+    document.getElementById('speedVal').textContent = speed;
+    localStorage.setItem('prompterPhoneSpeed', speed);
+  } else if (kind === 'text') {
+    const v = Math.min(84, Math.max(28, +fsizeIn.value + dir * 2));
+    fsizeIn.value = v;
+    textEl.style.fontSize = v + 'px';
+    document.getElementById('fsizeVal').textContent = v;
+    localStorage.setItem('prompterPhoneText', v);
+    clampY(); apply();
+  } else if (kind === 'line') {
+    markFrac = Math.min(0.55, Math.max(0.16, markFrac + dir * 0.03));
+    lineIn.value = Math.round(markFrac * 100);
+    document.getElementById('lineVal').textContent = lineIn.value;
+    localStorage.setItem('prompterPhoneMarkFrac', markFrac.toFixed(3));
+    applyMark(); clampY(); apply();
+  }
+  syncPhoneControls();
+}));
+document.getElementById('phoneTune').addEventListener('click', () => {
+  if (camState === 'recording') return;
+  pause(); syncPhoneControls(); phonePanel.classList.toggle('open');
+});
+document.getElementById('phoneClose').addEventListener('click', () => phonePanel.classList.remove('open'));
+document.getElementById('phoneEditCurrent').addEventListener('click', () => {
+  phonePanel.classList.remove('open'); pause(); qeBox.value = script; quickEdit.classList.add('open'); qeBox.focus();
+});
+document.getElementById('phoneMirror').addEventListener('click', () => {
+  const b = document.querySelector('.dock-left [data-act="mirror"]'); if (b) b.click();
+});
+document.getElementById('phoneTop').addEventListener('click', () => { phonePanel.classList.remove('open'); toTop(); });
+document.addEventListener('touchstart', () => {
+  if (!playing && camState !== 'recording') return;
+  topwrap.classList.remove('fade');
+  document.body.classList.remove('faded');
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => {
+    if (playing) { topwrap.classList.add('fade'); document.body.classList.add('faded'); }
+  }, 2500);
+}, { passive: true });
+
+/* ---------- experimental voice-follow ---------- */
+const voiceBtn = document.getElementById('voiceBtn');
+const voiceState = document.getElementById('voiceState');
+const voiceStatusEl = document.getElementById('voiceStatus');
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+let voiceActive = false, voiceMode = '', voiceRec = null, voiceRaf = null, voiceLastT = null;
+let voiceWords = [], voiceWordEls = [], voiceIndex = 0, voiceTargetY = 0;
+let voiceAudioCtx = null, voiceAnalyser = null, voiceStream = null, voiceSoundHeard = null;
+let voiceRestartTimer = null, voiceStopRequested = false;
+
+function setVoiceStatus(msg, label) {
+  voiceStatusEl.textContent = msg;
+  if (label) voiceState.textContent = label;
+}
+function normalizeWord(w) {
+  return (w || '').toLowerCase().replace(/[’]/g, "'").replace(/[^a-z0-9']/g, '').replace(/^'+|'+$/g, '');
+}
+function renderVoiceWords() {
+  const clean = script.replace(/\s+$/, '');
+  const tokens = clean.split(/(\s+)/);
+  textEl.textContent = '';
+  voiceWords = []; voiceWordEls = [];
+  tokens.forEach(tok => {
+    if (!tok) return;
+    if (/^\s+$/.test(tok)) { textEl.appendChild(document.createTextNode(tok)); return; }
+    const s = document.createElement('span');
+    s.className = 'vword'; s.textContent = tok;
+    textEl.appendChild(s);
+    voiceWords.push(normalizeWord(tok)); voiceWordEls.push(s);
+  });
+}
+function resetVoiceFollowPosition() {
+  voiceIndex = 0; voiceTargetY = y;
+  voiceWordEls.forEach(el => el.classList.remove('heard', 'current'));
+  if (voiceWordEls[0]) voiceWordEls[0].classList.add('current');
+  setVoiceStatus('🎙 Voice follow · listening', 'Listening');
+}
+function setVoiceIndex(nextIdx) {
+  if (nextIdx <= voiceIndex || !voiceWordEls.length) return;
+  voiceIndex = Math.min(nextIdx, voiceWordEls.length);
+  voiceWordEls.forEach((el, i) => {
+    el.classList.toggle('heard', i < voiceIndex);
+    el.classList.toggle('current', i === voiceIndex);
+  });
+  if (voiceIndex >= voiceWordEls.length) { voiceTargetY = maxScroll(); return; }
+  const el = voiceWordEls[voiceIndex];
+  const rect = el.getBoundingClientRect();
+  voiceTargetY = Math.min(maxScroll(), Math.max(0, rect.top + y + rect.height / 2 - markFrac * window.innerHeight));
+  setVoiceStatus('🎙 Voice follow · heard you', 'Following');
+}
+function findVoiceSequence(seq, start, end) {
+  const lastStart = Math.min(end, voiceWords.length - seq.length);
+  for (let i = Math.max(0, start); i <= lastStart; i++) {
+    let ok = true;
+    for (let j = 0; j < seq.length; j++) { if (voiceWords[i + j] !== seq[j]) { ok = false; break; } }
+    if (ok) return i;
+  }
+  return -1;
+}
+function processVoiceTranscript(transcript) {
+  const heard = (transcript || '').split(/\s+/).map(normalizeWord).filter(Boolean);
+  if (!heard.length) return;
+  const maxN = Math.min(4, heard.length);
+  for (let n = maxN; n >= 2; n--) {
+    const seq = heard.slice(-n);
+    const pos = findVoiceSequence(seq, voiceIndex - n, voiceIndex + 60);
+    if (pos >= 0) { setVoiceIndex(pos + n); return; }
+  }
+  const last = heard[heard.length - 1];
+  const pos = findVoiceSequence([last], voiceIndex, voiceIndex + 35);
+  if (pos >= 0) setVoiceIndex(pos + 1);
+}
+function startWordFollow() {
+  voiceMode = 'word';
+  try {
+    voiceRec = new SpeechRec();
+    voiceRec.continuous = true;
+    voiceRec.interimResults = true;
+    voiceRec.lang = 'en-CA';
+    voiceRec.maxAlternatives = 1;
+    voiceRec.onresult = (event) => {
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) transcript += event.results[i][0].transcript + ' ';
+      processVoiceTranscript(transcript);
+    };
+    voiceRec.onerror = (event) => {
+      if (!voiceActive) return;
+      if (['audio-capture', 'not-allowed', 'service-not-allowed'].includes(event.error)) {
+        setVoiceStatus('🎙 Word-tracking unavailable · switching to sound mode', 'Sound mode');
+        const old = voiceRec; voiceRec = null;
+        if (old) { try { old.onend = null; old.stop(); } catch (e) {} }
+        startSoundFollow();
+      } else if (event.error !== 'no-speech') {
+        setVoiceStatus('🎙 Voice follow · listening', 'Listening');
+      }
+    };
+    voiceRec.onend = () => {
+      if (voiceActive && voiceMode === 'word' && !voiceStopRequested) {
+        clearTimeout(voiceRestartTimer);
+        voiceRestartTimer = setTimeout(() => { if (voiceRec) { try { voiceRec.start(); } catch (e) {} } }, 400);
+      }
+    };
+    voiceRec.start();
+    setVoiceStatus('🎙 Voice follow · listening', 'Listening');
+  } catch (e) {
+    startSoundFollow();
+  }
+}
+function attachSoundAnalyser(sourceStream) {
+  try {
+    if (!sourceStream || !sourceStream.getAudioTracks || !sourceStream.getAudioTracks().length) return false;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    if (voiceAudioCtx) { voiceAudioCtx.close().catch(() => {}); }
+    voiceAudioCtx = new AC();
+    if (voiceAudioCtx.state === 'suspended') voiceAudioCtx.resume().catch(() => {});
+    const source = voiceAudioCtx.createMediaStreamSource(sourceStream);
+    voiceAnalyser = voiceAudioCtx.createAnalyser();
+    voiceAnalyser.fftSize = 512;
+    source.connect(voiceAnalyser);
+    return true;
+  } catch (e) { return false; }
+}
+async function startSoundFollow() {
+  voiceMode = 'sound';
+  if (stream && attachSoundAnalyser(stream)) {
+    setVoiceStatus('🎙 Sound follow · say your line', 'Sound mode');
+    return;
+  }
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('no mic');
+    voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (!voiceActive) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; return; }
+    if (!attachSoundAnalyser(voiceStream)) throw new Error('no analyser');
+    setVoiceStatus('🎙 Sound follow · say your line', 'Sound mode');
+  } catch (e) {
+    stopVoiceFollow();
+    fsHint('Voice follow could not reach the microphone in this browser. Fixed-speed prompting still works.');
+  }
+}
+function voiceTick(t) {
+  if (!voiceActive) { voiceRaf = null; return; }
+  if (voiceLastT == null) voiceLastT = t;
+  const dt = Math.min(0.05, (t - voiceLastT) / 1000); voiceLastT = t;
+  if (voiceMode === 'word') {
+    const diff = voiceTargetY - y;
+    if (Math.abs(diff) > 1) y += Math.sign(diff) * Math.min(Math.abs(diff), 340 * dt);
+  } else if (voiceMode === 'sound' && voiceAnalyser) {
+    const data = new Uint8Array(voiceAnalyser.fftSize);
+    voiceAnalyser.getByteTimeDomainData(data);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; }
+    const heard = Math.sqrt(sum / data.length) > 0.035;
+    if (heard !== voiceSoundHeard) {
+      voiceSoundHeard = heard;
+      setVoiceStatus(heard ? '🎙 Sound follow · hearing you' : '🎙 Sound follow · holding for your voice', 'Sound mode');
+    }
+    if (heard) y += speed * dt;
+  }
+  clampY(); apply();
+  voiceRaf = requestAnimationFrame(voiceTick);
+}
+async function startVoiceFollow() {
+  pause();
+  phonePanel.classList.remove('open');
+  voiceActive = true; voiceStopRequested = false; voiceSoundHeard = null;
+  document.body.classList.add('voice-on');
+  setPlayUI('⏸', 'Pause');
+  voiceBtn.classList.add('on');
+  voiceState.textContent = 'Starting';
+  renderVoiceWords();
+  resetVoiceFollowPosition();
+  if (SpeechRec) startWordFollow(); else await startSoundFollow();
+  if (voiceActive && !voiceRaf) voiceRaf = requestAnimationFrame(voiceTick);
+}
+function stopVoiceFollow() {
+  voiceActive = false; voiceStopRequested = true;
+  clearTimeout(voiceRestartTimer);
+  if (voiceRec) { try { voiceRec.onend = null; voiceRec.stop(); } catch (e) {} voiceRec = null; }
+  if (voiceRaf) cancelAnimationFrame(voiceRaf);
+  voiceRaf = null; voiceLastT = null;
+  if (voiceAudioCtx) { voiceAudioCtx.close().catch(() => {}); voiceAudioCtx = null; }
+  voiceAnalyser = null;
+  if (voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; }
+  document.body.classList.remove('voice-on');
+  setPlayUI('▶', 'Play');
+  voiceBtn.classList.remove('on');
+  voiceState.textContent = 'Off';
+  voiceStatusEl.textContent = '';
+  render(); apply();
+}
+voiceBtn.addEventListener('click', () => { if (voiceActive) stopVoiceFollow(); else startVoiceFollow(); });
+voiceStatusEl.addEventListener('click', () => { if (voiceActive) stopVoiceFollow(); });
+syncPhoneControls();
 
 render(); apply();
 </script>

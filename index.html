@@ -293,8 +293,7 @@
     transition: opacity .3s ease; }
   body.air.faded #fsPill { opacity: 0; pointer-events: none; }
   body.air.recording #fsPill { opacity: 1 !important; pointer-events: auto !important; }
-  body.air .phone-btn .ic.fs4 { display: inline-grid; grid-template-columns: auto auto; gap: 0 3px; font-size: 13px; line-height: 1.02; }
-  body.air .phone-btn .ic.fs4 b { font-weight: 900; }
+  body.air #fsPill .ic svg { display: block; }
   body.air #phoneTune .ic { font-size: 30px; }
   body.air #phoneBar { display: grid; grid-template-columns: 1fr 1fr 1.35fr 1fr 1.2fr; gap: 14px; align-items: stretch;
     position: fixed; left: 50%; transform: translateX(-50%); width: min(780px, calc(100vw - 300px)); bottom: 16px; z-index: 1100;
@@ -392,7 +391,7 @@
   <button class="phone-btn icon-only" data-act="edit" aria-label="Saved scripts"><span class="ic">☰</span></button>
   <button class="phone-btn icon-only" id="phoneTune" aria-label="Phone controls"><span class="ic">⚙</span></button>
 </nav>
-<button class="phone-btn" id="fsPill" data-act="fs" aria-label="Full screen"><span class="ic fs4"><b>↖</b><b>↗</b><b>↙</b><b>↘</b></span><span class="lbl">Fullscreen</span></button>
+<button class="phone-btn" id="fsPill" data-act="fs" aria-label="Full screen"><span class="ic"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></span><span class="lbl">Fullscreen</span></button>
 <section id="phonePanel" aria-label="Phone controls">
   <div class="pp-head"><span>Phone controls</span><button class="pp-close" id="phoneClose" aria-label="Close">×</button></div>
   <div class="step-row"><span class="name">Speed</span><button class="step-btn" data-step="speed:-1" aria-label="Slower">−</button><span class="value" id="phoneSpeedVal">80</span><button class="step-btn" data-step="speed:1" aria-label="Faster">+</button></div>

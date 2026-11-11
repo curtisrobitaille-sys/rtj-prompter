@@ -638,16 +638,11 @@ function placeCamPills() {
 function syncTouchSheet() {
   const r = campillsEl.getBoundingClientRect();
   if (!r.height) { sheetEl.style.display = 'none'; return; }
-  const rotated = touchDy() > 0;
   sheetEl.style.display = 'block';
   sheetEl.style.top = (r.top - 6) + 'px';
   sheetEl.style.left = (r.left - 6) + 'px';
   sheetEl.style.width = (r.width + 6) + 'px';
-  /* after a rotation the bottom row's touches are delivered ~90px low — down over the
-     bottom bar — so the apron stretches to catch them there and sits above the bar
-     (but still below the Tune panel); before any rotation it stays a short apron */
-  sheetEl.style.height = (r.height + (rotated ? 102 : 40)) + 'px';
-  sheetEl.style.zIndex = rotated ? '1140' : '999';
+  sheetEl.style.height = (r.height + 40) + 'px';
 }
 
 /* zoom-out control — only appears when the camera itself reports a zoom range */
@@ -744,7 +739,7 @@ function touchProbe() {
    nothing at all. After the phone has been rotated, the test positions shift down by
    TOUCH_DY: the calibration Curtis measured on his phone, where touches were landing
    a row high after coming back to vertical. One dial — his number rules it. */
-const TOUCH_DY = 90;
+const TOUCH_DY = 30;
 function touchDy() { return Object.keys(orientationSeen).length > 1 ? TOUCH_DY : 0; }
 function rectHit(el, x, y, dy) {
   const r = el.getBoundingClientRect();
@@ -766,7 +761,6 @@ function sliderFromX(x) {
 let stackTouch = null;
 function stackDown(e) {
   if (!isPhoneLayout) return;
-  syncTouchSheet();
   const p = stackPoint(e);
   const dy = touchDy();
   const wrap = document.getElementById('zoomWrap');

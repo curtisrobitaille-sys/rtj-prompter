@@ -189,7 +189,25 @@
   #discardBtn { background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; }
 
   /* ---------- phone layout (v1) ---------- */
-  #phoneBar, #phonePanel, #voiceStatus, #fsPill { display: none; }
+  #phoneBar, #phonePanel, #voiceStatus, #fsPill, #helpPanel { display: none; }
+  /* keyboard-shortcut guide: a small ? button at the top left, and its pop-up card */
+  #helpBtn { display: inline-flex; align-items: center; justify-content: center; position: fixed; top: 118px; left: 14px;
+    width: 44px; height: 44px; border-radius: 50%; z-index: 1100; cursor: pointer;
+    background: linear-gradient(180deg, rgba(23,58,69,.92), rgba(10,32,41,.92));
+    border: 1px solid rgba(125,211,220,.45); color: #bfeef2; font-size: 21px; font-weight: 800;
+    box-shadow: 0 10px 24px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.22); transition: opacity .3s ease; }
+  body.faded #helpBtn { opacity: 0; pointer-events: none; }
+  body.recording #helpBtn { opacity: 1 !important; pointer-events: auto !important; }
+  body.help-open #helpPanel { display: block; }
+  #helpPanel { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(480px, 92vw);
+    background: linear-gradient(180deg, rgba(16,52,64,.98), rgba(7,26,34,.98)); border: 1px solid rgba(125,211,220,.35);
+    border-radius: 24px; padding: 22px 22px 16px; z-index: 1300; box-shadow: 0 24px 60px rgba(0,0,0,.55); color: #eaf6f7; }
+  #helpPanel h3 { margin: 0 0 10px; font-size: 20px; color: #fff; }
+  #helpClose { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; font-size: 16px; cursor: pointer; }
+  .help-row { display: flex; align-items: center; gap: 14px; padding: 7px 0; font-size: 16.5px; border-top: 1px solid rgba(255,255,255,.07); }
+  .key { min-width: 108px; text-align: center; padding: 5px 10px; border-radius: 9px; background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.22); border-bottom-width: 3px; font-weight: 800; color: #bfeef2; font-size: 15px; }
   /* rotation resync: briefly unpainting the fixed controls forces Safari to rebuild their tap areas to match the screen */
   body.resync #campills, body.resync #phoneBar { display: none !important; }
   /* the touch sheet's catch apron around the camera stack (geometry set in JS) */
@@ -220,6 +238,7 @@
     #scroller { z-index: 2; }
     body.camon #stage::before { content: ''; position: absolute; left: 0; right: 0; top: calc(var(--sat) + 72px); height: 45vh; height: 45dvh; z-index: 1; pointer-events: none;
       background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.62) 18%, rgba(0,0,0,.62) 82%, rgba(0,0,0,.30)); }
+    #helpBtn { display: none; }
     #phoneBar { display: grid; grid-template-columns: 52px 52px minmax(104px, 1fr) 52px 52px; gap: 14px; align-items: stretch;
       position: fixed; left: 8px; right: 8px; bottom: calc(var(--sab) + 8px); z-index: 1100;
       transition: transform .3s ease, opacity .3s ease; }
@@ -289,7 +308,8 @@
   body.air #marker .line { left: 30px; right: 30px; }
   body.air.camon #stage::before { content: ''; position: absolute; left: 0; right: 0; top: 74px; height: 46vh; z-index: 1; pointer-events: none;
     background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.62) 18%, rgba(0,0,0,.62) 82%, rgba(0,0,0,.30)); }
-  body.air #fsPill { display: inline-flex; position: fixed; right: 18px; bottom: 16px; width: 212px; z-index: 1100;
+  body.air #helpBtn { top: 84px; }
+  body.air #fsPill { display: inline-flex; position: fixed; right: 18px; bottom: 16px; width: 104px; z-index: 1100;
     transition: opacity .3s ease; }
   body.air.faded #fsPill { opacity: 0; pointer-events: none; }
   body.air.recording #fsPill { opacity: 1 !important; pointer-events: auto !important; }
@@ -391,7 +411,20 @@
   <button class="phone-btn icon-only" data-act="edit" aria-label="Saved scripts"><span class="ic">☰</span></button>
   <button class="phone-btn icon-only" id="phoneTune" aria-label="Phone controls"><span class="ic">⚙</span></button>
 </nav>
-<button class="phone-btn" id="fsPill" data-act="fs" aria-label="Full screen"><span class="ic"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></span><span class="lbl">Fullscreen</span></button>
+<button class="phone-btn" id="fsPill" data-act="fs" aria-label="Full screen"><span class="ic"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></span></button>
+<button id="helpBtn" aria-label="Keyboard shortcuts">?</button>
+<div id="helpPanel" role="dialog" aria-label="Keyboard shortcuts">
+  <h3>Keyboard shortcuts</h3>
+  <button id="helpClose" aria-label="Close">✕</button>
+  <div class="help-row"><span class="key">Space</span><span>Play / pause</span></div>
+  <div class="help-row"><span class="key">↑</span><span>Speed up</span></div>
+  <div class="help-row"><span class="key">↓</span><span>Slow down</span></div>
+  <div class="help-row"><span class="key">→</span><span>Nudge the text forward</span></div>
+  <div class="help-row"><span class="key">←</span><span>Nudge the text back</span></div>
+  <div class="help-row"><span class="key">Home</span><span>Back to the top</span></div>
+  <div class="help-row"><span class="key">Mouse wheel</span><span>Scroll the text by hand</span></div>
+  <div class="help-row"><span class="key">Esc</span><span>Close pop-ups</span></div>
+</div>
 <section id="phonePanel" aria-label="Phone controls">
   <div class="pp-head"><span>Phone controls</span><button class="pp-close" id="phoneClose" aria-label="Close">×</button></div>
   <div class="step-row"><span class="name">Speed</span><button class="step-btn" data-step="speed:-1" aria-label="Slower">−</button><span class="value" id="phoneSpeedVal">80</span><button class="step-btn" data-step="speed:1" aria-label="Faster">+</button></div>
@@ -614,8 +647,8 @@ libPop.addEventListener('click', (e) => { if (e.target === libPop) libPop.classL
 
 /* keyboard */
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { libPop.classList.remove('open'); quickEdit.classList.remove('open'); takePop.classList.remove('open'); return; }
-  if (libPop.classList.contains('open') || quickEdit.classList.contains('open')) return;
+  if (e.key === 'Escape') { libPop.classList.remove('open'); quickEdit.classList.remove('open'); takePop.classList.remove('open'); document.body.classList.remove('help-open'); return; }
+  if (libPop.classList.contains('open') || quickEdit.classList.contains('open') || document.body.classList.contains('help-open')) return;
   // Arrow keys belong to a slider while it has focus: the control's
   // own step is 1 per press (holding repeats, so it runs faster).
   // The global handler used to ALSO grab the keys and jump the speed
@@ -1078,6 +1111,10 @@ document.querySelectorAll('[data-step]').forEach(btn => btn.addEventListener('cl
   }
   syncPhoneControls();
 }));
+/* keyboard-shortcut guide (? button, top left) */
+document.getElementById('helpBtn').addEventListener('click', () => document.body.classList.add('help-open'));
+document.getElementById('helpClose').addEventListener('click', () => document.body.classList.remove('help-open'));
+
 document.getElementById('phoneTune').addEventListener('click', () => {
   if (camState === 'recording') return;
   pause(); syncPhoneControls(); phonePanel.classList.toggle('open');

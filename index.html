@@ -190,6 +190,8 @@
 
   /* ---------- phone layout (v1) ---------- */
   #phoneBar, #phonePanel, #voiceStatus { display: none; }
+  /* rotation resync: briefly unpainting the fixed controls forces Safari to rebuild their tap areas to match the screen */
+  body.resync #campills, body.resync #phoneBar { display: none !important; }
   .vword.heard { color: #f3d27a; }
   .vword.current { text-decoration: underline; text-decoration-color: var(--gold); text-decoration-thickness: 3px; text-underline-offset: 7px; }
   @media (max-width: 820px), (max-height: 500px) and (pointer: coarse) {
@@ -231,7 +233,7 @@
     .phone-btn.record .dot { width: 17px; height: 17px; border-radius: 50%; display: block; background: radial-gradient(circle at 38% 32%, #ffb1a1, #ff3b1f 55%, #c11100); box-shadow: 0 0 10px rgba(255,60,30,.8); }
     body.recording .phone-btn.record .dot { animation: blink 1s steps(2) infinite; }
     .phone-btn.on { background: linear-gradient(180deg, rgba(122, 84, 16, .94), rgba(40, 26, 4, .96)); border-color: #f5c86e; color: #ffe1a1; }
-    #campills { top: auto; right: 8px; bottom: calc(var(--sab) + 90px); flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; column-gap: 14px; row-gap: 28px; width: min(336px, calc(100vw - 16px)); }
+    #campills { top: auto; right: 8px; bottom: calc(var(--sab) + 90px); flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; column-gap: 14px; row-gap: 28px; width: min(336px, calc(100vw - 16px)); transform: translateZ(0); }
     #campills .rtj-btn { min-width: 0; padding: 10px 14px 10px 10px; font-size: .68rem; gap: 6px; }
     #campills .rtj-btn .ic { width: 30px; height: 30px; font-size: 13px; }
     #zoomWrap { position: static; order: -1; margin-left: auto; background: rgba(0,0,0,.55); padding: 11px 13px; border-radius: 999px; }
@@ -619,8 +621,30 @@ function setupZoom() {
   } catch (e) { wrap.style.display = 'none'; }
 }
 
-/* after the phone rotates, re-check the live camera track so the zoom slider stays bound to it */
-window.addEventListener('orientationchange', () => setTimeout(() => { if (stream) setupZoom(); }, 350));
+/* Orientation state: each orientation keeps the state it had on first load. Rotating away
+   and back restores that orientation's setup — the fixed controls are repainted so Safari
+   rebuilds their tap areas for this orientation (otherwise the buttons can highlight a row
+   below the thumb), the layout functions re-run as they did on load, and the zoom slider
+   re-binds to the live camera track. */
+const orientationSeen = {};
+function currentOrientation() { return window.matchMedia('(orientation: portrait)').matches ? 'portrait' : 'landscape'; }
+orientationSeen[currentOrientation()] = true; /* the first-load state */
+let resyncTimer = null;
+function resyncAfterRotate() {
+  clearTimeout(resyncTimer);
+  resyncTimer = setTimeout(() => {
+    document.body.classList.add('resync');
+    void document.body.offsetHeight;
+    setTimeout(() => {
+      document.body.classList.remove('resync');
+      applyMark(); clampY(); apply(); /* the same layout pass as first load */
+      if (stream) setupZoom();
+      orientationSeen[currentOrientation()] = true;
+    }, 120);
+  }, 80);
+}
+window.addEventListener('orientationchange', resyncAfterRotate);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', resyncAfterRotate);
 
 function setRecUI(label) { document.querySelectorAll('[data-act="rec"]').forEach(b => b.querySelector('.lbl').textContent = label); }
 async function recButtonFlow() {

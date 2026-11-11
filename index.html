@@ -189,7 +189,7 @@
   #discardBtn { background: #1c1c1f; color: var(--ink); border: 1px solid #3a3a3e; }
 
   /* ---------- phone layout (v1) ---------- */
-  #phoneBar, #phonePanel, #voiceStatus { display: none; }
+  #phoneBar, #phonePanel, #voiceStatus, #fsPill { display: none; }
   /* rotation resync: briefly unpainting the fixed controls forces Safari to rebuild their tap areas to match the screen */
   body.resync #campills, body.resync #phoneBar { display: none !important; }
   /* the touch sheet's catch apron around the camera stack (geometry set in JS) */
@@ -289,10 +289,15 @@
   body.air #marker .line { left: 30px; right: 30px; }
   body.air.camon #stage::before { content: ''; position: absolute; left: 0; right: 0; top: 74px; height: 46vh; z-index: 1; pointer-events: none;
     background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.62) 18%, rgba(0,0,0,.62) 82%, rgba(0,0,0,.30)); }
-  #phoneBar .air-only { display: none; }
-  body.air #phoneBar .air-only { display: inline-flex; }
-  body.air #phoneBar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; align-items: stretch;
-    position: fixed; left: 50%; transform: translateX(-50%); width: min(900px, 94vw); bottom: 16px; z-index: 1100;
+  body.air #fsPill { display: inline-flex; position: fixed; right: 18px; bottom: 16px; width: 212px; z-index: 1100;
+    transition: opacity .3s ease; }
+  body.air.faded #fsPill { opacity: 0; pointer-events: none; }
+  body.air.recording #fsPill { opacity: 1 !important; pointer-events: auto !important; }
+  body.air .phone-btn .ic.fs4 { display: inline-grid; grid-template-columns: auto auto; gap: 0 3px; font-size: 13px; line-height: 1.02; }
+  body.air .phone-btn .ic.fs4 b { font-weight: 900; }
+  body.air #phoneTune .ic { font-size: 30px; }
+  body.air #phoneBar { display: grid; grid-template-columns: 1fr 1fr 1.35fr 1fr 1.2fr; gap: 14px; align-items: stretch;
+    position: fixed; left: 50%; transform: translateX(-50%); width: min(780px, calc(100vw - 300px)); bottom: 16px; z-index: 1100;
     transition: transform .3s ease, opacity .3s ease; }
   body.air.faded #phoneBar { opacity: 0; transform: translateX(-50%) translateY(130%); pointer-events: none; }
   body.air.recording #phoneBar { opacity: 1 !important; transform: translateX(-50%) !important; pointer-events: auto !important; }
@@ -385,9 +390,9 @@
   <button class="phone-btn icon-only" data-act="top" aria-label="Back to top"><span class="ic">↑</span></button>
   <button class="phone-btn record" data-act="rec"><span class="dot"></span><span class="lbl">Record</span></button>
   <button class="phone-btn icon-only" data-act="edit" aria-label="Saved scripts"><span class="ic">☰</span></button>
-  <button class="phone-btn icon-only air-only" data-act="fs" aria-label="Full screen"><span class="ic">⛶</span><span class="lbl" hidden>Full screen</span></button>
   <button class="phone-btn icon-only" id="phoneTune" aria-label="Phone controls"><span class="ic">⚙</span></button>
 </nav>
+<button class="phone-btn" id="fsPill" data-act="fs" aria-label="Full screen"><span class="ic fs4"><b>↖</b><b>↗</b><b>↙</b><b>↘</b></span><span class="lbl">Fullscreen</span></button>
 <section id="phonePanel" aria-label="Phone controls">
   <div class="pp-head"><span>Phone controls</span><button class="pp-close" id="phoneClose" aria-label="Close">×</button></div>
   <div class="step-row"><span class="name">Speed</span><button class="step-btn" data-step="speed:-1" aria-label="Slower">−</button><span class="value" id="phoneSpeedVal">80</span><button class="step-btn" data-step="speed:1" aria-label="Faster">+</button></div>
@@ -559,7 +564,7 @@ function toggleFullscreen() {
   } catch (e) { fsHint('The browser blocked full screen — Fn-F on the keyboard works too.'); }
 }
 
-document.querySelectorAll('.floating-dock .rtj-btn, #phoneBar [data-act]').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('.floating-dock .rtj-btn, #phoneBar [data-act], #fsPill').forEach(b => b.addEventListener('click', () => {
   const act = b.dataset.act;
   if (act === 'play') countdownThenPlay();
   else if (act === 'top') toTop();

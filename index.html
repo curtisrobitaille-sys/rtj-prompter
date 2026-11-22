@@ -572,7 +572,17 @@ function pause() {
   document.body.classList.remove('faded');
 }
 function countdownThenPlay() {
-  if (typeof voiceActive !== 'undefined' && voiceActive) { stopVoiceFollow(); return; }
+  if (typeof voiceActive !== 'undefined' && voiceActive) {
+    /* Voice follow owns the scroll: Play holds it in place (still listening,
+       highlight keeps tracking) or resumes it — it never switches follow off.
+       The Voice follow button is the on/off switch. */
+    voiceHeld = !voiceHeld;
+    setPlayUI(voiceHeld ? '▶' : '⏸', voiceHeld ? 'Play' : 'Pause');
+    if (voiceHeld) setVoiceStatus('🎙 Voice follow · held — tap Play to resume', 'Held');
+    else setVoiceStatus(voiceMode === 'word' ? '🎙 Voice follow · listening' : '🎙 Sound follow · say your line', voiceMode === 'word' ? 'Listening' : 'Sound mode');
+    diagLog('VOICE', voiceHeld ? 'follow HELD via the Play button (scroll paused, still listening)' : 'follow RESUMED via the Play button');
+    return;
+  }
   if (playing) { pause(); return; }
   let n = 3; countEl.style.display = 'flex'; countEl.textContent = n;
   const iv = setInterval(() => {
@@ -915,7 +925,9 @@ function cameraOff() {
   if (camState === 'countdown') { clearInterval(countdownIv); countEl.style.display = 'none'; }
   camState = 'off';
   document.body.classList.remove('camon');
-  if (voiceActive && voiceMode === 'sound') stopVoiceFollow();
+  /* Sound follow only dies with the camera when it is borrowing the camera's
+     stream; on its own microphone it keeps following with the camera off. */
+  if (voiceActive && voiceMode === 'sound' && !voiceStream) stopVoiceFollow();
   if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
   cam.srcObject = null;
   document.querySelectorAll('[data-act="rec"]').forEach(b => b.classList.remove('on'));
@@ -961,7 +973,7 @@ function beginTake() {
   setRecUI('0:00');
   recTimer = setInterval(() => { setRecUI(fmtTime(Date.now() - recStart)); }, 250);
   toTop();
-  if (voiceActive) { resetVoiceFollowPosition(); }
+  if (voiceActive) { voiceHeld = false; setPlayUI('⏸', 'Pause'); resetVoiceFollowPosition(); }
   else { play(); }
 }
 
@@ -1196,7 +1208,7 @@ const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 let voiceActive = false, voiceMode = '', voiceRec = null, voiceRaf = null, voiceLastT = null;
 let voiceWords = [], voiceWordEls = [], voiceIndex = 0, voiceTargetY = 0;
 let voiceAudioCtx = null, voiceAnalyser = null, voiceStream = null, voiceSoundHeard = null;
-let voiceRestartTimer = null, voiceStopRequested = false;
+let voiceRestartTimer = null, voiceStopRequested = false, voiceHeld = false;
 let voiceAdvanceSamples = [], voicePrevTail = '';
 const VOICE_COMMON_WORDS = new Set(['the', 'and', 'for', 'you', 'that', 'with', 'from', 'this', 'have', 'are', 'was', 'were', 'will', 'your', 'they', 'them', 'then', 'than', 'into', 'over', 'about', 'there', 'their', 'been', 'what', 'when', 'where', 'which', 'while', 'had', 'has', 'his', 'her', 'she', 'him', 'all', 'can', 'out', 'our', 'who', 'how', 'now', 'but', 'not', 'one', 'two', 'get', 'got', 'just', 'like', 'said', 'says', 'way', 'day', 'man', 'new', 'see', 'him']);
 
@@ -1400,8 +1412,10 @@ function voiceTick(t) {
   if (voiceLastT == null) voiceLastT = t;
   const dt = Math.min(0.05, (t - voiceLastT) / 1000); voiceLastT = t;
   if (voiceMode === 'word') {
-    const diff = voiceTargetY - y;
-    if (Math.abs(diff) > 1) y += Math.sign(diff) * Math.min(Math.abs(diff), 340 * dt);
+    if (!voiceHeld) {
+      const diff = voiceTargetY - y;
+      if (Math.abs(diff) > 1) y += Math.sign(diff) * Math.min(Math.abs(diff), 340 * dt);
+    }
   } else if (voiceMode === 'sound' && voiceAnalyser) {
     const data = new Uint8Array(voiceAnalyser.fftSize);
     voiceAnalyser.getByteTimeDomainData(data);
@@ -1410,9 +1424,9 @@ function voiceTick(t) {
     const heard = Math.sqrt(sum / data.length) > 0.035;
     if (heard !== voiceSoundHeard) {
       voiceSoundHeard = heard;
-      setVoiceStatus(heard ? '🎙 Sound follow · hearing you' : '🎙 Sound follow · holding for your voice', 'Sound mode');
+      if (!voiceHeld) setVoiceStatus(heard ? '🎙 Sound follow · hearing you' : '🎙 Sound follow · holding for your voice', 'Sound mode');
     }
-    if (heard) y += speed * dt;
+    if (heard && !voiceHeld) y += speed * dt;
   }
   clampY(); apply();
   voiceRaf = requestAnimationFrame(voiceTick);
@@ -1420,7 +1434,7 @@ function voiceTick(t) {
 async function startVoiceFollow() {
   pause();
   phonePanel.classList.remove('open');
-  voiceActive = true; voiceStopRequested = false; voiceSoundHeard = null;
+  voiceActive = true; voiceStopRequested = false; voiceSoundHeard = null; voiceHeld = false;
   document.body.classList.add('voice-on');
   setPlayUI('⏸', 'Pause');
   voiceBtn.classList.add('on');
@@ -1438,7 +1452,7 @@ function stopVoiceFollow() {
     diagLog('■ STOP', 'session ' + secs + 's · ended at word ' + voiceIndex + '/' + voiceWordEls.length + ' · matches ' + diagSession.jumps + ' · big jumps ' + diagSession.bigJumps + ' · restarts ' + diagSession.restarts);
     diagSession = null;
   }
-  voiceActive = false; voiceStopRequested = true;
+  voiceActive = false; voiceStopRequested = true; voiceHeld = false;
   clearTimeout(voiceRestartTimer);
   if (voiceRec) { try { voiceRec.onend = null; voiceRec.stop(); } catch (e) {} voiceRec = null; }
   if (voiceRaf) cancelAnimationFrame(voiceRaf);

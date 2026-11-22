@@ -208,6 +208,21 @@
   .help-row { display: flex; align-items: center; gap: 14px; padding: 7px 0; font-size: 16.5px; border-top: 1px solid rgba(255,255,255,.07); }
   .key { min-width: 108px; text-align: center; padding: 5px 10px; border-radius: 9px; background: rgba(255,255,255,.08);
     border: 1px solid rgba(255,255,255,.22); border-bottom-width: 3px; font-weight: 800; color: #bfeef2; font-size: 15px; }
+  /* voice-follow diagnostic log: button in the controls panel + pop-up log card */
+  .voice-log-btn { width: 100%; min-height: 48px; margin-top: 10px; border-radius: 15px; border: 1.5px solid rgba(125,211,220,.5); background: rgba(16,52,64,.55); color: #bfeef2; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; padding: 10px 13px; cursor: pointer; }
+  .voice-log-btn .state { color: #fff; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+  #diagPanel { display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(640px, 94vw);
+    background: linear-gradient(180deg, rgba(16,52,64,.98), rgba(7,26,34,.98)); border: 1px solid rgba(125,211,220,.35);
+    border-radius: 24px; padding: 22px 22px 16px; z-index: 1300; box-shadow: 0 24px 60px rgba(0,0,0,.55); color: #eaf6f7; }
+  body.diag-open #diagPanel { display: block; }
+  #diagPanel h3 { margin: 0 0 10px; font-size: 20px; color: #fff; }
+  #diagClose { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; font-size: 16px; cursor: pointer; }
+  #diagText { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+    max-height: 52vh; overflow-y: auto; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 10px 12px; margin: 0 0 12px; }
+  .diag-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .diag-actions button { flex: 1; min-height: 44px; border-radius: 12px; border: 1px solid rgba(125,211,220,.4); background: rgba(255,255,255,.07); color: #eaf6f7; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+  .diag-note { font-size: 12.5px; color: rgba(234,246,247,.65); margin: 10px 0 0; }
   /* rotation resync: briefly unpainting the fixed controls forces Safari to rebuild their tap areas to match the screen */
   body.resync #campills, body.resync #phoneBar { display: none !important; }
   /* the touch sheet's catch apron around the camera stack (geometry set in JS) */
@@ -425,6 +440,17 @@
   <div class="help-row"><span class="key">Mouse wheel</span><span>Scroll the text by hand</span></div>
   <div class="help-row"><span class="key">Esc</span><span>Close pop-ups</span></div>
 </div>
+<div id="diagPanel" role="dialog" aria-label="Voice follow diagnostic log">
+  <h3>Voice follow log</h3>
+  <button id="diagClose" aria-label="Close">✕</button>
+  <pre id="diagText">(log is empty)</pre>
+  <div class="diag-actions">
+    <button id="diagCopy">Copy log</button>
+    <button id="diagDownload">Download</button>
+    <button id="diagClear">Clear</button>
+  </div>
+  <p class="diag-note">Records what voice follow hears and how far the highlight jumps each time. If it ever runs away, open this log, copy it, and send it to Selah — the lines marked ⚠️ show where it went wrong. The log stays on this device, even if the page reloads.</p>
+</div>
 <section id="phonePanel" aria-label="Phone controls">
   <div class="pp-head"><span>Phone controls</span><button class="pp-close" id="phoneClose" aria-label="Close">×</button></div>
   <div class="step-row"><span class="name">Speed</span><button class="step-btn" data-step="speed:-1" aria-label="Slower">−</button><span class="value" id="phoneSpeedVal">80</span><button class="step-btn" data-step="speed:1" aria-label="Faster">+</button></div>
@@ -432,6 +458,7 @@
   <div class="step-row"><span class="name">Line</span><button class="step-btn" data-step="line:-1" aria-label="Move reading line up">−</button><span class="value" id="phoneLineVal">28</span><button class="step-btn" data-step="line:1" aria-label="Move reading line down">+</button></div>
   <button class="voice-btn" id="voiceBtn"><span>🎙 Voice follow</span><span class="state" id="voiceState">Off</span></button>
   <p class="pp-note">Experimental: when your browser supports it, the words move as you speak. If word-tracking is unavailable, it uses the simpler sound mode — it moves while it hears your voice and holds when you pause.</p>
+  <button class="voice-log-btn" id="diagBtn"><span>📋 Voice log</span><span class="state" id="diagCount">0 entries</span></button>
   <div class="pp-actions">
     <button id="phoneEditCurrent">Edit text</button>
     <button id="phoneMirror">Mirror</button>
@@ -647,7 +674,7 @@ libPop.addEventListener('click', (e) => { if (e.target === libPop) libPop.classL
 
 /* keyboard */
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { libPop.classList.remove('open'); quickEdit.classList.remove('open'); takePop.classList.remove('open'); document.body.classList.remove('help-open'); return; }
+  if (e.key === 'Escape') { libPop.classList.remove('open'); quickEdit.classList.remove('open'); takePop.classList.remove('open'); document.body.classList.remove('help-open'); document.body.classList.remove('diag-open'); return; }
   if (libPop.classList.contains('open') || quickEdit.classList.contains('open') || document.body.classList.contains('help-open')) return;
   // Arrow keys belong to a slider while it has focus: the control's
   // own step is 1 per press (holding repeats, so it runs faster).
@@ -1098,6 +1125,69 @@ document.addEventListener('touchstart', () => {
   }, 2500);
 }, { passive: true });
 
+/* ---------- voice-follow diagnostic log ---------- */
+const DIAG_KEY = 'rtjVoiceDiagLogV1';
+const DIAG_MAX = 600;
+let diagEntries = [];
+try { const saved = JSON.parse(localStorage.getItem(DIAG_KEY) || '[]'); if (Array.isArray(saved)) diagEntries = saved; } catch (e) { diagEntries = []; }
+const diagT0 = performance.now();
+let diagSession = null, voiceLastHeard = '', diagLastNoMatch = 0;
+function diagStamp() {
+  const d = new Date(); const p = n => String(n).padStart(2, '0');
+  return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()) + ' (+' + ((performance.now() - diagT0) / 1000).toFixed(1) + 's)';
+}
+function renderDiagPanel() {
+  const pre = document.getElementById('diagText');
+  if (!pre) return;
+  pre.textContent = diagEntries.length ? diagEntries.join('\n') : '(log is empty)';
+  pre.scrollTop = pre.scrollHeight;
+}
+function diagLog(tag, msg) {
+  diagEntries.push('[' + diagStamp() + '] ' + tag + ' ' + msg);
+  if (diagEntries.length > DIAG_MAX) diagEntries.splice(0, diagEntries.length - DIAG_MAX);
+  try { localStorage.setItem(DIAG_KEY, JSON.stringify(diagEntries)); } catch (e) {}
+  const c = document.getElementById('diagCount');
+  if (c) c.textContent = diagEntries.length + (diagEntries.length === 1 ? ' entry' : ' entries');
+  if (document.body.classList.contains('diag-open')) renderDiagPanel();
+}
+window.addEventListener('error', (e) => { try { diagLog('⚠️ JS ERROR', (e.message || 'unknown error') + (e.lineno ? ' (line ' + e.lineno + ')' : '')); } catch (err) {} });
+(function initDiagPanel() {
+  const c = document.getElementById('diagCount');
+  if (c) c.textContent = diagEntries.length + (diagEntries.length === 1 ? ' entry' : ' entries');
+  document.getElementById('diagBtn').addEventListener('click', () => { document.body.classList.add('diag-open'); renderDiagPanel(); });
+  document.getElementById('diagClose').addEventListener('click', () => document.body.classList.remove('diag-open'));
+  document.getElementById('diagClear').addEventListener('click', () => {
+    diagEntries = [];
+    try { localStorage.removeItem(DIAG_KEY); } catch (e) {}
+    const cc = document.getElementById('diagCount'); if (cc) cc.textContent = '0 entries';
+    renderDiagPanel();
+  });
+  document.getElementById('diagCopy').addEventListener('click', async (ev) => {
+    const text = diagEntries.join('\n');
+    const btn = ev.currentTarget; const old = btn.textContent;
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {}
+    if (!ok) {
+      try {
+        const pre = document.getElementById('diagText');
+        const range = document.createRange(); range.selectNodeContents(pre);
+        const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        ok = document.execCommand('copy'); sel.removeAllRanges();
+      } catch (e) {}
+    }
+    btn.textContent = ok ? 'Copied ✓' : 'Copy failed — long-press the log text';
+    setTimeout(() => { btn.textContent = old; }, 2200);
+  });
+  document.getElementById('diagDownload').addEventListener('click', () => {
+    const blob = new Blob([diagEntries.join('\n')], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'rtj-voice-log.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  });
+})();
+
 /* ---------- experimental voice-follow ---------- */
 const voiceBtn = document.getElementById('voiceBtn');
 const voiceState = document.getElementById('voiceState');
@@ -1137,7 +1227,28 @@ function resetVoiceFollowPosition() {
 }
 function setVoiceIndex(nextIdx) {
   if (nextIdx <= voiceIndex || !voiceWordEls.length) return;
+  const beforeIdx = voiceIndex;
   voiceIndex = Math.min(nextIdx, voiceWordEls.length);
+  if (diagSession) {
+    const jump = voiceIndex - beforeIdx;
+    const now = performance.now();
+    diagSession.jumps++;
+    diagSession.samples.push({ t: now, idx: voiceIndex });
+    while (diagSession.samples.length && now - diagSession.samples[0].t > 3000) diagSession.samples.shift();
+    const advanced = voiceIndex - diagSession.samples[0].idx;
+    if (jump > 10) {
+      diagSession.bigJumps++;
+      diagLog('⚠️ BIG JUMP', '+' + jump + ' words → word ' + voiceIndex + '/' + voiceWordEls.length + ' · heard "' + voiceLastHeard + '"');
+    } else {
+      diagLog('MATCH', '+' + jump + ' → word ' + voiceIndex + '/' + voiceWordEls.length + ' · heard "' + voiceLastHeard + '"');
+    }
+    if (!diagSession.runaway && diagSession.samples.length > 1 && advanced > 120) {
+      diagSession.runaway = true;
+      diagLog('⚠️⚠️ RUNAWAY', 'highlight advanced ' + advanced + ' words in under 3s · at word ' + voiceIndex + '/' + voiceWordEls.length + ' · last heard "' + voiceLastHeard + '"');
+    } else if (diagSession.runaway && advanced <= 120) {
+      diagSession.runaway = false;
+    }
+  }
   voiceWordEls.forEach((el, i) => {
     el.classList.toggle('heard', i < voiceIndex);
     el.classList.toggle('current', i === voiceIndex);
@@ -1160,6 +1271,8 @@ function findVoiceSequence(seq, start, end) {
 function processVoiceTranscript(transcript) {
   const heard = (transcript || '').split(/\s+/).map(normalizeWord).filter(Boolean);
   if (!heard.length) return;
+  voiceLastHeard = heard.slice(-6).join(' ');
+  diagLog('HEARD', '"' + voiceLastHeard + '" (' + heard.length + ' words in transcript)');
   const maxN = Math.min(4, heard.length);
   for (let n = maxN; n >= 2; n--) {
     const seq = heard.slice(-n);
@@ -1168,7 +1281,12 @@ function processVoiceTranscript(transcript) {
   }
   const last = heard[heard.length - 1];
   const pos = findVoiceSequence([last], voiceIndex, voiceIndex + 35);
-  if (pos >= 0) setVoiceIndex(pos + 1);
+  if (pos >= 0) { setVoiceIndex(pos + 1); return; }
+  const nowMs = performance.now();
+  if (nowMs - diagLastNoMatch > 1000) {
+    diagLastNoMatch = nowMs;
+    diagLog('NO MATCH', 'heard "' + voiceLastHeard + '" — nothing matched near word ' + voiceIndex);
+  }
 }
 function startWordFollow() {
   voiceMode = 'word';
@@ -1185,7 +1303,9 @@ function startWordFollow() {
     };
     voiceRec.onerror = (event) => {
       if (!voiceActive) return;
+      diagLog('REC ERROR', 'recognition error: ' + event.error);
       if (['audio-capture', 'not-allowed', 'service-not-allowed'].includes(event.error)) {
+        diagLog('MODE', 'word-tracking failed (' + event.error + ') → switching to sound mode');
         setVoiceStatus('🎙 Word-tracking unavailable · switching to sound mode', 'Sound mode');
         const old = voiceRec; voiceRec = null;
         if (old) { try { old.onend = null; old.stop(); } catch (e) {} }
@@ -1196,11 +1316,14 @@ function startWordFollow() {
     };
     voiceRec.onend = () => {
       if (voiceActive && voiceMode === 'word' && !voiceStopRequested) {
+        if (diagSession) diagSession.restarts++;
+        diagLog('REC', 'recognition ended → restarting' + (diagSession ? ' (restart #' + diagSession.restarts + ')' : ''));
         clearTimeout(voiceRestartTimer);
         voiceRestartTimer = setTimeout(() => { if (voiceRec) { try { voiceRec.start(); } catch (e) {} } }, 400);
       }
     };
     voiceRec.start();
+    diagLog('MODE', 'word-tracking started · lang ' + voiceRec.lang + ' · continuous + interim results on');
     setVoiceStatus('🎙 Voice follow · listening', 'Listening');
   } catch (e) {
     startSoundFollow();
@@ -1223,6 +1346,7 @@ function attachSoundAnalyser(sourceStream) {
 }
 async function startSoundFollow() {
   voiceMode = 'sound';
+  diagLog('MODE', 'sound follow started (moves while it hears sound, holds on pause)');
   if (stream && attachSoundAnalyser(stream)) {
     setVoiceStatus('🎙 Sound follow · say your line', 'Sound mode');
     return;
@@ -1234,6 +1358,7 @@ async function startSoundFollow() {
     if (!attachSoundAnalyser(voiceStream)) throw new Error('no analyser');
     setVoiceStatus('🎙 Sound follow · say your line', 'Sound mode');
   } catch (e) {
+    diagLog('⚠️ MIC', 'sound follow could not start: ' + (e && e.message ? e.message : e));
     stopVoiceFollow();
     fsHint('Voice follow could not reach the microphone in this browser. Fixed-speed prompting still works.');
   }
@@ -1270,10 +1395,17 @@ async function startVoiceFollow() {
   voiceState.textContent = 'Starting';
   renderVoiceWords();
   resetVoiceFollowPosition();
+  diagSession = { start: performance.now(), jumps: 0, bigJumps: 0, restarts: 0, runaway: false, samples: [] };
+  diagLog('▶ START', 'voice follow on · script ' + voiceWords.length + ' words · speech recognition ' + (SpeechRec ? 'available' : 'NOT available in this browser'));
   if (SpeechRec) startWordFollow(); else await startSoundFollow();
   if (voiceActive && !voiceRaf) voiceRaf = requestAnimationFrame(voiceTick);
 }
 function stopVoiceFollow() {
+  if (diagSession) {
+    const secs = ((performance.now() - diagSession.start) / 1000).toFixed(0);
+    diagLog('■ STOP', 'session ' + secs + 's · ended at word ' + voiceIndex + '/' + voiceWordEls.length + ' · matches ' + diagSession.jumps + ' · big jumps ' + diagSession.bigJumps + ' · restarts ' + diagSession.restarts);
+    diagSession = null;
+  }
   voiceActive = false; voiceStopRequested = true;
   clearTimeout(voiceRestartTimer);
   if (voiceRec) { try { voiceRec.onend = null; voiceRec.stop(); } catch (e) {} voiceRec = null; }

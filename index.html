@@ -449,7 +449,7 @@
     <button id="diagDownload">Download</button>
     <button id="diagClear">Clear</button>
   </div>
-  <p class="diag-note">Records what voice follow hears and how far the highlight jumps each time. If it ever runs away, open this log, copy it, and send it to Selah — the lines marked ⚠️ show where it went wrong. The log stays on this device, even if the page reloads.</p>
+  <p class="diag-note">Records what voice follow hears and how far the highlight jumps each time. If it ever runs away, open this log, copy it, and send it to Selah — ⚠️ lines show big jumps, and 🛡 lines show the guard stepping in to hold the highlight back. The log stays on this device, even if the page reloads.</p>
 </div>
 <section id="phonePanel" aria-label="Phone controls">
   <div class="pp-head"><span>Phone controls</span><button class="pp-close" id="phoneClose" aria-label="Close">×</button></div>
@@ -1197,6 +1197,8 @@ let voiceActive = false, voiceMode = '', voiceRec = null, voiceRaf = null, voice
 let voiceWords = [], voiceWordEls = [], voiceIndex = 0, voiceTargetY = 0;
 let voiceAudioCtx = null, voiceAnalyser = null, voiceStream = null, voiceSoundHeard = null;
 let voiceRestartTimer = null, voiceStopRequested = false;
+let voiceAdvanceSamples = [], voicePrevTail = '';
+const VOICE_COMMON_WORDS = new Set(['the', 'and', 'for', 'you', 'that', 'with', 'from', 'this', 'have', 'are', 'was', 'were', 'will', 'your', 'they', 'them', 'then', 'than', 'into', 'over', 'about', 'there', 'their', 'been', 'what', 'when', 'where', 'which', 'while', 'had', 'has', 'his', 'her', 'she', 'him', 'all', 'can', 'out', 'our', 'who', 'how', 'now', 'but', 'not', 'one', 'two', 'get', 'got', 'just', 'like', 'said', 'says', 'way', 'day', 'man', 'new', 'see', 'him']);
 
 function setVoiceStatus(msg, label) {
   voiceStatusEl.textContent = msg;
@@ -1221,28 +1223,47 @@ function renderVoiceWords() {
 }
 function resetVoiceFollowPosition() {
   voiceIndex = 0; voiceTargetY = y;
+  voiceAdvanceSamples = []; voicePrevTail = '';
   voiceWordEls.forEach(el => el.classList.remove('heard', 'current'));
   if (voiceWordEls[0]) voiceWordEls[0].classList.add('current');
   setVoiceStatus('🎙 Voice follow · listening', 'Listening');
 }
-function setVoiceIndex(nextIdx) {
+function setVoiceIndex(nextIdx, capIdx) {
   if (nextIdx <= voiceIndex || !voiceWordEls.length) return;
   const beforeIdx = voiceIndex;
-  voiceIndex = Math.min(nextIdx, voiceWordEls.length);
+  let target = Math.min(nextIdx, voiceWordEls.length);
+  /* Guard 1 — interim results are guesses and may only nudge the highlight;
+     a confirmed (final) result is required for a bigger move. */
+  if (capIdx !== undefined && capIdx < target) {
+    diagLog('🛡 GUARD', 'interim result tried to leap +' + (target - beforeIdx) + ' words — held to +' + Math.max(0, capIdx - beforeIdx) + ' (finals only for big moves)');
+    target = capIdx;
+  }
+  /* Guard 2 — advance budget: no matter what the recognizer does, the
+     highlight can never advance more than 30 words in any 3 seconds
+     (about four times faster than anyone reads aloud). */
+  const nowMs = performance.now();
+  while (voiceAdvanceSamples.length && nowMs - voiceAdvanceSamples[0].t > 3000) voiceAdvanceSamples.shift();
+  if (voiceAdvanceSamples.length) {
+    const budgetMax = voiceAdvanceSamples[0].idx + 30;
+    if (target > budgetMax) {
+      diagLog('🛡 GUARD', 'advance budget: tried to reach word ' + target + ' — held at word ' + budgetMax + ' (max 30 words per 3s)');
+      target = budgetMax;
+    }
+  }
+  if (target <= voiceIndex) return;
+  voiceIndex = target;
+  voiceAdvanceSamples.push({ t: nowMs, idx: voiceIndex });
   if (diagSession) {
     const jump = voiceIndex - beforeIdx;
-    const now = performance.now();
     diagSession.jumps++;
-    diagSession.samples.push({ t: now, idx: voiceIndex });
-    while (diagSession.samples.length && now - diagSession.samples[0].t > 3000) diagSession.samples.shift();
-    const advanced = voiceIndex - diagSession.samples[0].idx;
+    const advanced = voiceIndex - voiceAdvanceSamples[0].idx;
     if (jump > 10) {
       diagSession.bigJumps++;
       diagLog('⚠️ BIG JUMP', '+' + jump + ' words → word ' + voiceIndex + '/' + voiceWordEls.length + ' · heard "' + voiceLastHeard + '"');
     } else {
       diagLog('MATCH', '+' + jump + ' → word ' + voiceIndex + '/' + voiceWordEls.length + ' · heard "' + voiceLastHeard + '"');
     }
-    if (!diagSession.runaway && diagSession.samples.length > 1 && advanced > 120) {
+    if (!diagSession.runaway && voiceAdvanceSamples.length > 1 && advanced > 120) {
       diagSession.runaway = true;
       diagLog('⚠️⚠️ RUNAWAY', 'highlight advanced ' + advanced + ' words in under 3s · at word ' + voiceIndex + '/' + voiceWordEls.length + ' · last heard "' + voiceLastHeard + '"');
     } else if (diagSession.runaway && advanced <= 120) {
@@ -1268,20 +1289,30 @@ function findVoiceSequence(seq, start, end) {
   }
   return -1;
 }
-function processVoiceTranscript(transcript) {
+function processVoiceTranscript(transcript, lastIsFinal) {
   const heard = (transcript || '').split(/\s+/).map(normalizeWord).filter(Boolean);
   if (!heard.length) return;
   voiceLastHeard = heard.slice(-6).join(' ');
-  diagLog('HEARD', '"' + voiceLastHeard + '" (' + heard.length + ' words in transcript)');
+  /* Guard 3 — a repeated interim event with the same tail carries no new
+     information; bursts of duplicates must not ratchet the highlight. */
+  if (voiceLastHeard === voicePrevTail && !lastIsFinal) return;
+  voicePrevTail = voiceLastHeard;
+  diagLog('HEARD', '"' + voiceLastHeard + '" (' + heard.length + ' words in transcript' + (lastIsFinal ? ', final' : ', interim') + ')');
+  const capIdx = lastIsFinal ? undefined : voiceIndex + 6;
   const maxN = Math.min(4, heard.length);
   for (let n = maxN; n >= 2; n--) {
     const seq = heard.slice(-n);
     const pos = findVoiceSequence(seq, voiceIndex - n, voiceIndex + 60);
-    if (pos >= 0) { setVoiceIndex(pos + n); return; }
+    if (pos >= 0) { setVoiceIndex(pos + n, capIdx); return; }
   }
+  /* Guard 4 — single-word matching is the weakest signal, so it only applies
+     to distinctive words (never common ones like "the" or "and") and only
+     looks a short way ahead. */
   const last = heard[heard.length - 1];
-  const pos = findVoiceSequence([last], voiceIndex, voiceIndex + 35);
-  if (pos >= 0) { setVoiceIndex(pos + 1); return; }
+  if (last.length >= 4 && !VOICE_COMMON_WORDS.has(last)) {
+    const pos = findVoiceSequence([last], voiceIndex, voiceIndex + 15);
+    if (pos >= 0) { setVoiceIndex(pos + 1, capIdx); return; }
+  }
   const nowMs = performance.now();
   if (nowMs - diagLastNoMatch > 1000) {
     diagLastNoMatch = nowMs;
@@ -1299,7 +1330,8 @@ function startWordFollow() {
     voiceRec.onresult = (event) => {
       let transcript = '';
       for (let i = 0; i < event.results.length; i++) transcript += event.results[i][0].transcript + ' ';
-      processVoiceTranscript(transcript);
+      const lastRes = event.results[event.results.length - 1];
+      processVoiceTranscript(transcript, !!(lastRes && lastRes.isFinal));
     };
     voiceRec.onerror = (event) => {
       if (!voiceActive) return;
@@ -1395,7 +1427,7 @@ async function startVoiceFollow() {
   voiceState.textContent = 'Starting';
   renderVoiceWords();
   resetVoiceFollowPosition();
-  diagSession = { start: performance.now(), jumps: 0, bigJumps: 0, restarts: 0, runaway: false, samples: [] };
+  diagSession = { start: performance.now(), jumps: 0, bigJumps: 0, restarts: 0, runaway: false };
   diagLog('▶ START', 'voice follow on · script ' + voiceWords.length + ' words · speech recognition ' + (SpeechRec ? 'available' : 'NOT available in this browser'));
   if (SpeechRec) startWordFollow(); else await startSoundFollow();
   if (voiceActive && !voiceRaf) voiceRaf = requestAnimationFrame(voiceTick);
